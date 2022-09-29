@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from "flowbite-react";
 import { Player } from "../../types/Player";
-import { ModalContext } from "../../contexts/CreateModal";
+import { ModalContext } from "../../contexts/create.context";
 
 export function CreateModal() {
   const { isOpenModal, setIsOpenModal } = useContext(ModalContext);
@@ -65,6 +65,10 @@ export function CreateModal() {
         next: false,
       };
 
+      localStorage.setItem(
+        "monopoly/players",
+        JSON.stringify([...players, newPlayer])
+      );
       setPlayers((prevState) => [...prevState, newPlayer]);
       toast("Player added.", { type: "success" });
 
@@ -74,8 +78,26 @@ export function CreateModal() {
 
       setId(id + 1);
     } else toast("Player limit exceeded.", { type: "error" });
+  };
 
-    localStorage.setItem("monopoly/players", JSON.stringify(players));
+  const removePlayer = (player: Player) => {
+    const playerStorage = localStorage.getItem("monopoly/players");
+    let playerArr;
+
+    if (playerStorage) {
+      let playerState = [...players];
+
+      // Remove from storage
+      playerArr = JSON.parse(playerStorage);
+      playerArr.splice(playerArr.indexOf(player), 1);
+      localStorage.setItem("monopoly/players", JSON.stringify(playerArr));
+
+      // Update state
+      playerState.splice(playerState.indexOf(player), 1);
+      setPlayers(playerState);
+
+      toast(`Player ${player.name} has been removed.`, { type: "success" });
+    }
   };
 
   const newGame = () => {};
@@ -117,7 +139,11 @@ export function CreateModal() {
           <div className="flex justify-between">
             {players.map((player) => (
               <Tooltip content={player.name} placement="top">
-                <Badge icon={icon.IoCheckmarkOutline} color="success" />
+                <Badge
+                  icon={icon.IoCheckmarkOutline}
+                  color="success"
+                  onClick={() => removePlayer(player)}
+                />
               </Tooltip>
             ))}
           </div>
