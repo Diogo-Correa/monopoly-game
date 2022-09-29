@@ -5,6 +5,11 @@ import { ModalContext } from "../../contexts/create.context";
 
 export function Menu() {
   const { setIsOpenModal } = useContext(ModalContext);
+
+  const handleGitHub = () => {
+    window.open("https://github.com/Diogo-Correa/monopoly-game", "_blank");
+  };
+
   return (
     <div>
       <a href="/" target="_blank">
@@ -16,7 +21,7 @@ export function Menu() {
           <icon.IoGameController className="mr-2 h-5 w-5" />
           New Game
         </Button>
-        <Button color="light" size="xl">
+        <Button onClick={handleGitHub} color="light" size="xl">
           <icon.IoLogoGithub className="mr-2 h-5 w-5" />
           GitHub
         </Button>

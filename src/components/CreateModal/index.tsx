@@ -12,16 +12,18 @@ import {
 } from "flowbite-react";
 import { Player } from "../../types/Player";
 import { ModalContext } from "../../contexts/create.context";
+import { GameContext } from "../../contexts/game.context";
 
 export function CreateModal() {
   const { isOpenModal, setIsOpenModal } = useContext(ModalContext);
+  const { hasGame, setHasGame } = useContext(GameContext);
   const [id, setId] = useState(0);
   const [qtd, setQtd] = useState(2);
   const [playerName, setPlayerName] = useState("");
   const [playerPin, setPlayerPin] = useState("");
 
   const [players, setPlayers] = useState<Player[]>([]);
-  const [pins, setPins] = useState([
+  const [pins, setPins] = useState<string[]>([
     "failure",
     "gray",
     "indigo",
@@ -74,7 +76,10 @@ export function CreateModal() {
 
       setPlayerName("");
       setPlayerPin("");
-      pins.splice(pins.indexOf(playerPin), 1);
+
+      let pinsArr = [...pins];
+      pinsArr.splice(pinsArr.indexOf(playerPin), 1);
+      setPins(pinsArr);
 
       setId(id + 1);
     } else toast("Player limit exceeded.", { type: "error" });
@@ -96,11 +101,17 @@ export function CreateModal() {
       playerState.splice(playerState.indexOf(player), 1);
       setPlayers(playerState);
 
+      // update pins color
+      setPins((prevState) => [...prevState, player.pinColor]);
+
       toast(`Player ${player.name} has been removed.`, { type: "success" });
     }
   };
 
-  const newGame = () => {};
+  const newGame = () => {
+    localStorage.setItem("monopoly/savedGame", "true");
+    setHasGame(true);
+  };
 
   useEffect(() => {
     const playerStorage = localStorage.getItem("monopoly/players");

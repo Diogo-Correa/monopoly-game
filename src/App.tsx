@@ -11,8 +11,8 @@ function App() {
   useEffect(() => {
     if (!localStorage.getItem("monopoly/players"))
       localStorage.setItem("monopoly/players", JSON.stringify([]));
-    if (localStorage.getItem("monopoly/savedGame")) {
-      // setGame(true);
+    if (!localStorage.getItem("monopoly/savedGame")) {
+      localStorage.setItem("monopoly/savedGame", "false");
     }
   }, []);
 
