@@ -11,17 +11,21 @@ import {
   Tooltip,
 } from "flowbite-react";
 import { Player } from "../../types/Player";
-import { ModalContext } from "../../contexts/CreateModal";
+import { ModalContext } from "../../contexts/create.context";
+import { GameContext } from "../../contexts/game.context";
+
+import { BigHead } from "@bigheads/core";
 
 export function CreateModal() {
   const { isOpenModal, setIsOpenModal } = useContext(ModalContext);
+  const { setHasGame } = useContext(GameContext);
   const [id, setId] = useState(0);
   const [qtd, setQtd] = useState(2);
   const [playerName, setPlayerName] = useState("");
   const [playerPin, setPlayerPin] = useState("");
 
   const [players, setPlayers] = useState<Player[]>([]);
-  const [pins, setPins] = useState([
+  const [pins, setPins] = useState<string[]>([
     "failure",
     "gray",
     "indigo",
@@ -65,20 +69,52 @@ export function CreateModal() {
         next: false,
       };
 
+      localStorage.setItem(
+        "monopoly/players",
+        JSON.stringify([...players, newPlayer])
+      );
       setPlayers((prevState) => [...prevState, newPlayer]);
       toast("Player added.", { type: "success" });
 
       setPlayerName("");
       setPlayerPin("");
-      pins.splice(pins.indexOf(playerPin), 1);
+
+      let pinsArr = [...pins];
+      pinsArr.splice(pinsArr.indexOf(playerPin), 1);
+      setPins(pinsArr);
 
       setId(id + 1);
     } else toast("Player limit exceeded.", { type: "error" });
-
-    localStorage.setItem("monopoly/players", JSON.stringify(players));
   };
 
-  const newGame = () => {};
+  const removePlayer = (player: Player) => {
+    const playerStorage = localStorage.getItem("monopoly/players");
+    let playerArr;
+
+    if (playerStorage) {
+      let playerState = [...players];
+
+      // Remove from storage
+      playerArr = JSON.parse(playerStorage);
+      playerArr.splice(playerArr.indexOf(player), 1);
+      localStorage.setItem("monopoly/players", JSON.stringify(playerArr));
+
+      // Update state
+      playerState.splice(playerState.indexOf(player), 1);
+      setPlayers(playerState);
+
+      // update pins color
+      setPins((prevState) => [...prevState, player.pinColor]);
+
+      toast(`Player ${player.name} has been removed.`, { type: "success" });
+    }
+  };
+
+  const newGame = () => {
+    localStorage.setItem("monopoly/savedGame", "true");
+    setHasGame(true);
+    setIsOpenModal(false);
+  };
 
   useEffect(() => {
     const playerStorage = localStorage.getItem("monopoly/players");
@@ -96,7 +132,7 @@ export function CreateModal() {
       <Modal.Body>
         <div className="space-y-6 px-6 pb-4 sm:pb-6 lg:px-8 xl:pb-8">
           <h3 className="text-xl font-medium text-gray-900 dark:text-white">
-            Set game configurations
+            Set game settings
           </h3>
           <div>
             <div className="mb-2 block">
@@ -117,7 +153,11 @@ export function CreateModal() {
           <div className="flex justify-between">
             {players.map((player) => (
               <Tooltip content={player.name} placement="top">
-                <Badge icon={icon.IoCheckmarkOutline} color="success" />
+                <Badge
+                  icon={icon.IoCheckmarkOutline}
+                  color="success"
+                  onClick={() => removePlayer(player)}
+                />
               </Tooltip>
             ))}
           </div>
@@ -158,6 +198,7 @@ export function CreateModal() {
               </Select>
             </div>
           </div>
+
           <div className="w-full flex justify-between">
             <Button color="success" onClick={addPlayer}>
               Add player

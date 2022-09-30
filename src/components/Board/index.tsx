@@ -1,49 +1,91 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { toast } from "react-toastify";
 import * as icon from "react-icons/fa";
-import { Card, Tabs } from "flowbite-react";
+import { Card, Tabs, Button, Badge, Avatar } from "flowbite-react";
+import { GameContext } from "../../contexts/game.context";
 
 import "./style.css";
 import { Player } from "../../types/Player";
 
 export function Board() {
-
+  const { hasGame, setHasGame } = useContext(GameContext);
   const [players, setPlayers] = useState<Player[]>([]);
+
+  const handleControl = (player: Player) => {
+    let updatedPlayer = player;
+    let playerState = [...players];
+    const playerStorage = localStorage.getItem("monopoly/players");
+    let playerArr;
+    updatedPlayer.isIA = !updatedPlayer.isIA;
+    if (playerStorage) {
+      // Remove from storage
+      playerArr = JSON.parse(playerStorage);
+      playerArr.splice(playerArr.indexOf(player), 1);
+      playerArr.push(updatedPlayer);
+      localStorage.setItem("monopoly/players", JSON.stringify(playerArr));
+
+      playerState.splice(playerState.indexOf(player), 1);
+      playerState.push(updatedPlayer);
+      setPlayers(playerState);
+
+      toast(`Player ${player.name} has been updated.`, { type: "success" });
+    }
+  };
+
+  const finishGame = () => {
+    localStorage.setItem("monopoly/savedGame", "false");
+    setHasGame(false);
+  };
 
   useEffect(() => {
     const playerStorage = localStorage.getItem("monopoly/players");
-     if(playerStorage) setPlayers(JSON.parse(playerStorage));
-  }, [])
+    if (playerStorage) setPlayers(JSON.parse(playerStorage));
+  }, []);
 
   return (
     <div className="all-board">
       <Card>
         <Tabs.Group aria-label="Tabs with underline" style="underline">
-          {
-            players?.map(player => (
-            <Tabs.Item active={player.next ? true : false} title={player.name} icon={icon.FaMapPin}>
-              <div className="text-left flex font-extrabold text-base">
-                <icon.FaMoneyBill size={26} className="mx-3 text-green-500"/> 
-                ${player.cash}
-              </div>
-              <div className="text-left flex font-extrabold text-base">
-                <icon.FaSadCry size={26} className="mx-3 text-blue-500"/> 
-                {player.inJail ? "Yes" : "Not"}
-              </div>
-              <div className="text-left flex font-extrabold text-base">
-                <icon.FaRobot size={26} className="mx-3 text-gray-500"/> 
-                {player.isIA ? "Yes" : "Not"}
-              </div>
-              <div className="text-left flex font-extrabold text-base">
-                <icon.FaGamepad size={26} className="mx-3 text-indigo-800"/> 
+          {players?.map((player) => (
+            <Tabs.Item
+              active={player.next ? true : false}
+              title={
+                <>
+                  <Badge color={player.pinColor}>{player.name}</Badge>
+                  <Badge color="gray">{String(player.plays)}</Badge>
+                </>
+              }
+              icon={!player.isIA ? icon.FaGamepad : icon.FaRobot}
+            >
+              <div className="text-left flex space-between font-extrabold text-base">
+                <icon.FaMoneyBill size={26} className="mx-3 text-green-500" />$
+                {player.cash}
+                <icon.FaHouseDamage size={26} className="mx-3 text-black" />
                 {player.plays}
               </div>
-              <div className="text-left flex font-extrabold text-base">
-                <icon.FaHouseDamage size={26} className="mx-3 text-black"/> 
-                {player.plays}
+              <div className="text-left flex font-extrabold text-base my-3">
+                <div className="mr-2">
+                  {!player.isIA && <Button color="light">Roll dice</Button>}
+                </div>
+                {!player.isIA && (
+                  <Button color="dark" onClick={() => handleControl(player)}>
+                    Surrender
+                  </Button>
+                )}
+                {player.isIA && (
+                  <Button color="dark" onClick={() => handleControl(player)}>
+                    Get control
+                  </Button>
+                )}
               </div>
             </Tabs.Item>
-            ))
-          }
+          ))}
+
+          <Tabs.Item title="Game" icon={icon.FaCog}>
+            <Button color="dark" onClick={finishGame}>
+              Finish
+            </Button>
+          </Tabs.Item>
         </Tabs.Group>
       </Card>
       <div className="boardTable">
@@ -53,7 +95,10 @@ export function Board() {
               <h2 className="label">Community Chest</h2>
               <div className="deck"></div>
             </div>
-            <h1 className="title">MONOPOLY</h1>
+
+            <img src="/logo.png" className="logo title" alt="Vite logo" />
+            <Button color="dark">Show log</Button>
+
             <div className="chance-deck">
               <h2 className="label">Chance</h2>
               <div className="deck"></div>
@@ -64,6 +109,13 @@ export function Board() {
             <div className="containerBoard">
               <div className="instructions">
                 Collect $200.00 salary as you pass
+                <div className="absolute">
+                  <Avatar.Group>
+                    <Avatar rounded={true} stacked={true}></Avatar>
+                    <Avatar rounded={true} stacked={true}></Avatar>
+                    <Avatar.Counter total={5} href="#" />
+                  </Avatar.Group>
+                </div>
               </div>
               <div className="go-word">go</div>
             </div>
@@ -190,7 +242,7 @@ export function Board() {
             <div className="space railroad">
               <div className="containerBoard">
                 <div className="name long-name">Pennsylvania Railroad</div>
-                <i className="drawing fa fa-subway"></i>
+                <icon.FaSubway className="drawing" />
                 <div className="price">Price $200</div>
               </div>
             </div>
@@ -284,7 +336,7 @@ export function Board() {
             <div className="space utility waterworks">
               <div className="containerBoard">
                 <div className="name">Waterworks</div>
-                <i className="drawing fa fa-tint"></i>
+                <icon.FaTint className="drawing" />
                 <div className="price">Price $120</div>
               </div>
             </div>
@@ -361,8 +413,7 @@ export function Board() {
             <div className="space fee luxury-tax">
               <div className="containerBoard">
                 <div className="name">Luxury Tax</div>
-                <icon.FaCrown className="drawing" />
-                <div className="drawing fa fa-diamond"></div>
+                <icon.FaGem className="drawing" />
                 <div className="instructions">Pay $75.00</div>
               </div>
             </div>

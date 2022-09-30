@@ -1,29 +1,19 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import { Board } from './components/Board'
-import { Menu } from './components/Menu'
-import { ModalContextProvider } from './contexts/CreateModal'
+import { useEffect, useState, useContext } from "react";
+import "./App.css";
+import { GameContext, GameContextProvider } from "./contexts/game.context";
 
 function App() {
-
-  const [savedGame, setGame] = useState(true)
+  const { hasGame } = useContext(GameContext);
 
   useEffect(() => {
-    if(!localStorage.getItem("monopoly/players")) localStorage.setItem("monopoly/players", JSON.stringify([]));
-    if(localStorage.getItem("monopoly/savedGame")) {
-      setGame(true);
+    if (!localStorage.getItem("monopoly/players"))
+      localStorage.setItem("monopoly/players", JSON.stringify([]));
+    if (!localStorage.getItem("monopoly/savedGame")) {
+      localStorage.setItem("monopoly/savedGame", "false");
     }
-  }, [])
+  }, []);
 
-  return (
-    <ModalContextProvider>
-      <div className="App">
-        {
-          !savedGame ? <Menu /> : <Board />
-        }
-      </div>
-    </ModalContextProvider>
-  )
+  return <GameContextProvider>{""}</GameContextProvider>;
 }
 
-export default App
+export default App;
