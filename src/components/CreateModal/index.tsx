@@ -14,6 +14,8 @@ import { Player } from "../../types/Player";
 import { ModalContext } from "../../contexts/create.context";
 import { GameContext } from "../../contexts/game.context";
 
+import { BigHead } from "@bigheads/core";
+
 export function CreateModal() {
   const { isOpenModal, setIsOpenModal } = useContext(ModalContext);
   const { setHasGame } = useContext(GameContext);
@@ -196,6 +198,7 @@ export function CreateModal() {
               </Select>
             </div>
           </div>
+
           <div className="w-full flex justify-between">
             <Button color="success" onClick={addPlayer}>
               Add player
