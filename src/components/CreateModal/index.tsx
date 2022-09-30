@@ -16,7 +16,7 @@ import { GameContext } from "../../contexts/game.context";
 
 export function CreateModal() {
   const { isOpenModal, setIsOpenModal } = useContext(ModalContext);
-  const { hasGame, setHasGame } = useContext(GameContext);
+  const { setHasGame } = useContext(GameContext);
   const [id, setId] = useState(0);
   const [qtd, setQtd] = useState(2);
   const [playerName, setPlayerName] = useState("");
@@ -111,6 +111,7 @@ export function CreateModal() {
   const newGame = () => {
     localStorage.setItem("monopoly/savedGame", "true");
     setHasGame(true);
+    setIsOpenModal(false);
   };
 
   useEffect(() => {
@@ -129,7 +130,7 @@ export function CreateModal() {
       <Modal.Body>
         <div className="space-y-6 px-6 pb-4 sm:pb-6 lg:px-8 xl:pb-8">
           <h3 className="text-xl font-medium text-gray-900 dark:text-white">
-            Set game configurations
+            Set game settings
           </h3>
           <div>
             <div className="mb-2 block">

@@ -1,4 +1,7 @@
 import { createContext, ReactNode, useState } from "react";
+import { Board } from "../components/Board";
+import { Menu } from "../components/Menu";
+import { ModalContextProvider } from "../contexts/create.context";
 
 type GameContext = {
   hasGame: boolean;
@@ -34,6 +37,9 @@ export const GameContextProvider = ({ children }: GameContextProps) => {
       }}
     >
       {children}
+      <ModalContextProvider>
+        <div className="App">{!hasGame ? <Menu /> : <Board />}</div>
+      </ModalContextProvider>
     </GameContext.Provider>
   );
 };

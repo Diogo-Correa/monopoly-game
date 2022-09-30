@@ -1,8 +1,5 @@
 import { useEffect, useState, useContext } from "react";
 import "./App.css";
-import { Board } from "./components/Board";
-import { Menu } from "./components/Menu";
-import { ModalContextProvider } from "./contexts/create.context";
 import { GameContext, GameContextProvider } from "./contexts/game.context";
 
 function App() {
@@ -16,13 +13,7 @@ function App() {
     }
   }, []);
 
-  return (
-    <GameContextProvider>
-      <ModalContextProvider>
-        <div className="App">{!hasGame ? <Menu /> : <Board />}</div>
-      </ModalContextProvider>
-    </GameContextProvider>
-  );
+  return <GameContextProvider>{""}</GameContextProvider>;
 }
 
 export default App;

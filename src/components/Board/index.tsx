@@ -50,32 +50,22 @@ export function Board() {
             <Tabs.Item
               active={player.next ? true : false}
               title={player.name}
-              icon={icon.FaMapPin}
+              icon={!player.isIA ? icon.FaGamepad : icon.FaRobot}
             >
-              <div className="text-left flex font-extrabold text-base">
+              <div className="text-left flex space-between font-extrabold text-base">
                 <icon.FaMoneyBill size={26} className="mx-3 text-green-500" />$
                 {player.cash}
-              </div>
-              <div className="text-left flex font-extrabold text-base">
                 <icon.FaSadCry size={26} className="mx-3 text-blue-500" />
                 {player.inJail ? "Yes" : "Not"}
-              </div>
-              <div className="text-left flex font-extrabold text-base">
-                <icon.FaRobot size={26} className="mx-3 text-gray-500" />
-                {player.isIA ? "Yes" : "Not"}
-              </div>
-              <div className="text-left flex font-extrabold text-base">
                 <icon.FaGamepad size={26} className="mx-3 text-indigo-800" />
                 {player.plays}
-              </div>
-              <div className="text-left flex font-extrabold text-base">
                 <icon.FaHouseDamage size={26} className="mx-3 text-black" />
                 {player.plays}
               </div>
               <div className="text-left flex font-extrabold text-base my-3">
-                {!player.isIA && <Button color="light">Roll dice</Button>}
-              </div>
-              <div className="text-left flex font-extrabold text-base my-3">
+                <div className="mr-2">
+                  {!player.isIA && <Button color="light">Roll dice</Button>}
+                </div>
                 {!player.isIA && (
                   <Button color="dark" onClick={() => handleControl(player)}>
                     Surrender
@@ -90,7 +80,7 @@ export function Board() {
             </Tabs.Item>
           ))}
 
-          <Tabs.Item title="Game" icon={icon.FaGamepad}>
+          <Tabs.Item title="Game" icon={icon.FaCog}>
             <Button color="dark" onClick={finishGame}>
               Finish
             </Button>
@@ -105,6 +95,7 @@ export function Board() {
               <div className="deck"></div>
             </div>
             <h1 className="title">MONOPOLY</h1>
+            teste
             <div className="chance-deck">
               <h2 className="label">Chance</h2>
               <div className="deck"></div>
@@ -241,7 +232,7 @@ export function Board() {
             <div className="space railroad">
               <div className="containerBoard">
                 <div className="name long-name">Pennsylvania Railroad</div>
-                <i className="drawing fa fa-subway"></i>
+                <icon.FaSubway className="drawing" />
                 <div className="price">Price $200</div>
               </div>
             </div>
@@ -335,7 +326,7 @@ export function Board() {
             <div className="space utility waterworks">
               <div className="containerBoard">
                 <div className="name">Waterworks</div>
-                <i className="drawing fa fa-tint"></i>
+                <icon.FaTint className="drawing" />
                 <div className="price">Price $120</div>
               </div>
             </div>
@@ -412,8 +403,7 @@ export function Board() {
             <div className="space fee luxury-tax">
               <div className="containerBoard">
                 <div className="name">Luxury Tax</div>
-                <icon.FaCrown className="drawing" />
-                <div className="drawing fa fa-diamond"></div>
+                <icon.FaGem className="drawing" />
                 <div className="instructions">Pay $75.00</div>
               </div>
             </div>
