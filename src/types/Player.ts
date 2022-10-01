@@ -4,6 +4,7 @@ export type Player = {
   cash: Number;
   inJail: Boolean;
   pinColor: string;
+  avatar?: any;
   isIA: Boolean;
   plays: Number;
   next: Boolean;

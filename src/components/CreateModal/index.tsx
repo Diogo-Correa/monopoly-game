@@ -9,6 +9,7 @@ import {
   Select,
   Badge,
   Tooltip,
+  Avatar,
 } from "flowbite-react";
 import { Player } from "../../types/Player";
 import { ModalContext } from "../../contexts/create.context";
@@ -78,6 +79,7 @@ export function CreateModal() {
 
       setPlayerName("");
       setPlayerPin("");
+      //setPlayerAvatar(<BigHead/>);
 
       let pinsArr = [...pins];
       pinsArr.splice(pinsArr.indexOf(playerPin), 1);
@@ -111,9 +113,35 @@ export function CreateModal() {
   };
 
   const newGame = () => {
+    let bots: Player[] = [];
+
+    for(let i = players.length; i < qtd;i++) {
+      let newPlayer: Player = {
+        id: i,
+        name: `Bot ${i}`,
+        cash: 1500,
+        inJail: false,
+        pinColor: pins[i],
+        isIA: true,
+        plays: 0,
+        next: false,
+      }
+
+      bots.push(newPlayer);
+
+      setId(id + 1);
+    } 
+
+    localStorage.setItem(
+      "monopoly/players",
+      JSON.stringify([...players, ...bots])
+    );
+    setPlayers((prevState) => [...prevState, ...bots]);
+
     localStorage.setItem("monopoly/savedGame", "true");
     setHasGame(true);
     setIsOpenModal(false);
+
   };
 
   useEffect(() => {
