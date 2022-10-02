@@ -8,13 +8,12 @@ export const Utility: React.FC<SquareProps> = ({ id }) => {
   const price: number | undefined = BoardTheme.get(id)?.price;
   const icon: any = BoardTheme.get(id)?.icon;
   const other: any = BoardTheme.get(id)?.other;
-console.log(other)
   return (
     <>
     <div className="containerBoard">
       <div className="name">{name}</div>
         {icon}
-      <div className="price">{price && `Price ${price}`}</div>
+      <div className="price">{price && `Price $${price}`}</div>
       {other && <div className="diamond"></div>}
       <div className="instructions">{msg && msg}</div>
     </div>

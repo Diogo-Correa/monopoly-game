@@ -1,0 +1,27 @@
+.modal-square {
+    width: 100%;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.modal-square h2 {
+    display: block;
+    font-size: 2em;
+    font-weight: 600;
+}
+
+.modal-square p {
+    display: block;
+    font-size: .8em;
+    font-weight: 300;
+    margin-top: 1.5rem;
+}
+
+.modal-square .icon {
+    width: 100%;
+    font-size: 120px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    margin-top: 1.5rem;
+}

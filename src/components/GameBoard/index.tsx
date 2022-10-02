@@ -3,19 +3,18 @@ import { Timeline } from "flowbite-react";
 import { GameSquare } from "./GameSquare";
 import * as icon from "react-icons/fa";
 
-
 import "./style.css";
 
 export const GameBoard = () => {
-  const [bottom, setBottom] = useState<number[]>([10,9,8,7,6,5,4,3,2]);
+  const [bottom, setBottom] = useState<number[]>([10, 9, 8, 7, 6, 5, 4, 3, 2]);
   const [left, setLeft] = useState<number[]>([
-    20,19,18,17,16,15,14,13,12
+    20, 19, 18, 17, 16, 15, 14, 13, 12,
   ]);
   const [top, setTop] = useState<number[]>([
-    22,23,24,25,26,27,28,29,30
+    22, 23, 24, 25, 26, 27, 28, 29, 30,
   ]);
   const [right, setRight] = useState<number[]>([
-    32,33,34,35,36,37,38,39,40
+    32, 33, 34, 35, 36, 37, 38, 39, 40,
   ]);
 
   return (
@@ -55,7 +54,7 @@ export const GameBoard = () => {
             </div>
           </div>
 
-            <GameSquare id={1} key={1} />
+          <GameSquare id={1} key={1} />
 
           <div className="row horizontal-row bottom-row">
             {bottom.map((square) => (
