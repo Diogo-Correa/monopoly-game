@@ -2,6 +2,7 @@ import { Modal } from "flowbite-react";
 import { useContext } from "react";
 import { ModalContext } from "../../contexts/create.context";
 import { BoardTheme } from "../Board/theme";
+import { ColorBar } from "../Square/Squares/ColorBar"
 import "./style.css";
 
 export const SquareModal = ({ id }: any) => {
@@ -22,6 +23,7 @@ export const SquareModal = ({ id }: any) => {
     <div className="text-black">
         <Modal.Body>
             <div className="modal-square">
+            <ColorBar id={id} />
             <h2>{name}</h2>
             <div className="icon">{icon}</div>
             <p>{msg}</p>
