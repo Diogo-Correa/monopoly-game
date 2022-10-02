@@ -52,11 +52,6 @@ h6 {
   background: #5a6dba;
 }
 
-.boardTable {
-  padding-left: 50px !important;
-  padding-right: 50px !important;
-}
-
 .board {
   display: grid;
   grid-template-columns: 125px repeat(9, 80px) 125px;
@@ -100,6 +95,32 @@ h6 {
   transform: rotate(315deg);
   margin-top: 60px;
   margin-left: 60px;
+}
+
+.log-deck {
+  grid-column: 2/7;
+  grid-row: 2/4;
+  width: 400px;
+  height: 300px;
+  margin-top: -40px;
+  margin-left: 300px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: start;
+  text-align: start;
+  padding: 1.5rem;
+}
+
+.log-deck time {
+  font-size: smaller;
+}
+
+.log-deck h3 {
+  font-size: medium;
+}
+
+.log-deck p {
+  font-size:small;
 }
 
 .label {
@@ -382,6 +403,7 @@ h6 {
 
 .electric-company .drawing {
   color: #ffed20;
+  font-size: 60px;
 }
 
 .waterworks .containerBoard {
