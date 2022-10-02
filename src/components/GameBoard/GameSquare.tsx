@@ -11,6 +11,7 @@ export const GameSquare: FC<SquareProps> = ({ id }) => {
   const squareTypeClass = new Map<SquareType, string>([
     [SquareType.Railroad, "railroad"],
     [SquareType.Chance, "chance"],
+    [SquareType.Chest, "community-chest"],
     [SquareType.Go, "corner go"],
     [SquareType.GoToJail, "corner go-to-jail"],
     [SquareType.Jail, "corner jail"],

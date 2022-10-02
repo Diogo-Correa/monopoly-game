@@ -426,7 +426,6 @@ h6 {
   height: 5px;
   background: #080808;
   transform: rotate(45deg);
-  display: inline-block;
 }
 .income-tax .instructions {
   padding-top: 5px;

@@ -1,8 +1,9 @@
-import { ComponentProps, FC } from "react";
+import { FC } from "react";
 
 export interface SquareThemeData {
     readonly name: string;
     readonly price?: number;
     readonly msg?: string;
-    readonly icon?: FC<ComponentProps<'svg'>>;
+    readonly icon?: any;
+    readonly other?: boolean | null;
 }
