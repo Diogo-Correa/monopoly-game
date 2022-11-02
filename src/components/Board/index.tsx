@@ -8,8 +8,7 @@ import { Player } from "../../types/Player";
 import { GameBoard } from "../GameBoard";
 
 export function Board() {
-  const { hasGame, setHasGame } = useContext(GameContext);
-  const [players, setPlayers] = useState<Player[]>([]);
+  const { setHasGame, players, setPlayers } = useContext(GameContext);
 
   const handleControl = (player: Player) => {
     let updatedPlayer = player;
@@ -34,13 +33,10 @@ export function Board() {
 
   const finishGame = () => {
     localStorage.setItem("monopoly/savedGame", "false");
+    localStorage.setItem("monopoly/players", "[]");
     setHasGame(false);
+    setPlayers([]);
   };
-
-  useEffect(() => {
-    const playerStorage = localStorage.getItem("monopoly/players");
-    if (playerStorage) setPlayers(JSON.parse(playerStorage));
-  }, []);
 
   return (
     <div className="text-black">

@@ -9,23 +9,18 @@ import {
   Select,
   Badge,
   Tooltip,
-  Avatar,
 } from "flowbite-react";
 import { Player } from "../../types/Player";
 import { ModalContext } from "../../contexts/create.context";
 import { GameContext } from "../../contexts/game.context";
 
-import { BigHead } from "@bigheads/core";
-
 export function CreateModal() {
   const { isOpenModal, setIsOpenModal } = useContext(ModalContext);
-  const { setHasGame } = useContext(GameContext);
+  const { setHasGame, players, setPlayers } = useContext(GameContext);
   const [id, setId] = useState(0);
   const [qtd, setQtd] = useState(2);
   const [playerName, setPlayerName] = useState("");
   const [playerPin, setPlayerPin] = useState("");
-
-  const [players, setPlayers] = useState<Player[]>([]);
   const [pins, setPins] = useState<string[]>([
     "failure",
     "gray",
@@ -74,7 +69,7 @@ export function CreateModal() {
         "monopoly/players",
         JSON.stringify([...players, newPlayer])
       );
-      setPlayers((prevState) => [...prevState, newPlayer]);
+      setPlayers((prevState: any) => [...prevState, newPlayer]);
       toast("Player added.", { type: "success" });
 
       setPlayerName("");
@@ -136,18 +131,13 @@ export function CreateModal() {
       "monopoly/players",
       JSON.stringify([...players, ...bots])
     );
-    setPlayers((prevState) => [...prevState, ...bots]);
+    setPlayers((prevState: any) => [...prevState, ...bots]);
 
     localStorage.setItem("monopoly/savedGame", "true");
     setHasGame(true);
     setIsOpenModal(false);
 
   };
-
-  useEffect(() => {
-    const playerStorage = localStorage.getItem("monopoly/players");
-    if (playerStorage) setPlayers(JSON.parse(playerStorage));
-  }, []);
 
   return (
     <Modal
