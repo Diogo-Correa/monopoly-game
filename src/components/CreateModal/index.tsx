@@ -21,7 +21,7 @@ export function CreateModal() {
     const { setHasGame, players, setPlayers, pins, setPins } =
         useContext(GameContext)
     const [id, setId] = useState(0)
-    const [qtd, setQtd] = useState(2)
+    const [qtd, setQtd] = useState(players.length > 2 ? players.length : 2)
     const [playerName, setPlayerName] = useState('')
     const [playerPin, setPlayerPin] = useState(-1)
 
