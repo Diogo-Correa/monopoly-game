@@ -14,6 +14,7 @@ import { Player } from '../../types/Player'
 import { ModalContext } from '../../contexts/create.context'
 import { GameContext } from '../../contexts/game.context'
 import { pinsArr } from '../../util/PinsArray'
+import { PlayerPin } from '../Pin'
 
 export function CreateModal() {
     const { isOpenModal, setIsOpenModal } = useContext(ModalContext)
@@ -52,7 +53,7 @@ export function CreateModal() {
                 name: playerName,
                 cash: 1500,
                 inJail: false,
-                pin: playerPin,
+                pin: Number(playerPin),
                 isIA: false,
                 plays: 0,
                 next: false,
@@ -68,6 +69,7 @@ export function CreateModal() {
             setPlayerName('')
             setPlayerPin(-1)
 
+            // update pins
             pinsArr[playerPin].selected = true
             localStorage.setItem('monopoly/pins', JSON.stringify(pinsArr))
             setPins(pinsArr)
@@ -92,7 +94,7 @@ export function CreateModal() {
             playerState.splice(playerState.indexOf(player), 1)
             setPlayers(playerState)
 
-            // update pins color
+            // update pins
             pinsArr[player.pin].selected = false
             localStorage.setItem('monopoly/pins', JSON.stringify(pinsArr))
             setPins(pinsArr)
@@ -112,7 +114,7 @@ export function CreateModal() {
                 name: `Bot ${i}`,
                 cash: 1500,
                 inJail: false,
-                pin: pinsArr[i].id,
+                pin: Number(pinsArr[i].id),
                 isIA: true,
                 plays: 0,
                 next: false,
@@ -165,12 +167,24 @@ export function CreateModal() {
 
                     <div className="flex justify-between">
                         {players.map((player) => (
-                            <Tooltip content={player.name} placement="top">
+                            <Tooltip
+                                content={
+                                    player.name
+                                        ? player.name
+                                        : pins[player.pin].name
+                                }
+                                placement="top"
+                            >
                                 <Badge
-                                    icon={icon.IoCheckmarkOutline}
                                     color="success"
                                     onClick={() => removePlayer(player)}
-                                />
+                                >
+                                    <PlayerPin
+                                        id={player.pin}
+                                        name={''}
+                                        selected={false}
+                                    />
+                                </Badge>
                             </Tooltip>
                         ))}
                     </div>
@@ -195,7 +209,6 @@ export function CreateModal() {
                                 id="pins"
                                 required={true}
                                 icon={icon.IoPin}
-                                value={playerPin != -1 ? playerPin : -1}
                                 onChange={onHandleChangePlayerPin}
                             >
                                 <option value="-1">Choose pin</option>

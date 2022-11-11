@@ -38,7 +38,7 @@ export const pinsArr: Pin[] = [
     },
     {
         id: 7,
-        name: 'Turtle',
+        name: 'Frog',
         selected: false,
     },
 ]
