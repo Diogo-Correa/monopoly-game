@@ -13,23 +13,17 @@ import {
 import { Player } from '../../types/Player'
 import { ModalContext } from '../../contexts/create.context'
 import { GameContext } from '../../contexts/game.context'
+import { pinsArr } from '../../util/PinsArray'
+import { PlayerPin } from '../Pin'
 
 export function CreateModal() {
     const { isOpenModal, setIsOpenModal } = useContext(ModalContext)
-    const { setHasGame, players, setPlayers } = useContext(GameContext)
+    const { setHasGame, players, setPlayers, pins, setPins } =
+        useContext(GameContext)
     const [id, setId] = useState(0)
-    const [qtd, setQtd] = useState(2)
+    const [qtd, setQtd] = useState(players.length > 2 ? players.length : 2)
     const [playerName, setPlayerName] = useState('')
-    const [playerPin, setPlayerPin] = useState('')
-    const [pins, setPins] = useState<string[]>([
-        'failure',
-        'gray',
-        'indigo',
-        'info',
-        'pink',
-        'purple',
-        'success',
-    ])
+    const [playerPin, setPlayerPin] = useState(-1)
 
     const onHandleChangeQtd = (e: any) => {
         const qtd = e.target.value
@@ -50,8 +44,8 @@ export function CreateModal() {
     }
 
     const addPlayer = () => {
-        if (playerPin === '')
-            return toast('Choose a valid pin color!', { type: 'error' })
+        if (playerPin === -1)
+            return toast('Choose a valid pin!', { type: 'error' })
 
         if (players.length < qtd) {
             const newPlayer: Player = {
@@ -59,10 +53,11 @@ export function CreateModal() {
                 name: playerName,
                 cash: 1500,
                 inJail: false,
-                pinColor: playerPin,
+                pin: Number(playerPin),
                 isIA: false,
                 plays: 0,
                 next: false,
+                square: 1,
             }
 
             localStorage.setItem(
@@ -73,11 +68,11 @@ export function CreateModal() {
             toast('Player added.', { type: 'success' })
 
             setPlayerName('')
-            setPlayerPin('')
-            //setPlayerAvatar(<BigHead/>);
+            setPlayerPin(-1)
 
-            let pinsArr = [...pins]
-            pinsArr.splice(pinsArr.indexOf(playerPin), 1)
+            // update pins
+            pinsArr[playerPin].selected = true
+            localStorage.setItem('monopoly/pins', JSON.stringify(pinsArr))
             setPins(pinsArr)
 
             setId(id + 1)
@@ -100,8 +95,10 @@ export function CreateModal() {
             playerState.splice(playerState.indexOf(player), 1)
             setPlayers(playerState)
 
-            // update pins color
-            setPins((prevState) => [...prevState, player.pinColor])
+            // update pins
+            pinsArr[player.pin].selected = false
+            localStorage.setItem('monopoly/pins', JSON.stringify(pinsArr))
+            setPins(pinsArr)
 
             toast(`Player ${player.name} has been removed.`, {
                 type: 'success',
@@ -118,10 +115,11 @@ export function CreateModal() {
                 name: `Bot ${i}`,
                 cash: 1500,
                 inJail: false,
-                pinColor: pins[i],
+                pin: Number(pinsArr[i].id),
                 isIA: true,
                 plays: 0,
                 next: false,
+                square: 1,
             }
 
             bots.push(newPlayer)
@@ -171,12 +169,24 @@ export function CreateModal() {
 
                     <div className="flex justify-between">
                         {players.map((player) => (
-                            <Tooltip content={player.name} placement="top">
+                            <Tooltip
+                                content={
+                                    player.name
+                                        ? player.name
+                                        : pins[player.pin].name
+                                }
+                                placement="top"
+                            >
                                 <Badge
-                                    icon={icon.IoCheckmarkOutline}
                                     color="success"
                                     onClick={() => removePlayer(player)}
-                                />
+                                >
+                                    <PlayerPin
+                                        id={player.pin}
+                                        name={''}
+                                        selected={false}
+                                    />
+                                </Badge>
                             </Tooltip>
                         ))}
                     </div>
@@ -196,24 +206,25 @@ export function CreateModal() {
                     </div>
                     <div id="select">
                         <div className="mb-2 block">
-                            <Label htmlFor="pins" value="Pin color" />
+                            <Label htmlFor="pins" value="Pin" />
                             <Select
                                 id="pins"
                                 required={true}
                                 icon={icon.IoPin}
-                                value={playerPin != '' ? playerPin : ''}
                                 onChange={onHandleChangePlayerPin}
                             >
-                                <option value="">Choose pin color</option>
-                                {pins.map((pin) => (
-                                    <option
-                                        value={pin}
-                                        key={`text-${pin}`}
-                                        className={`text-${pin}`}
-                                    >
-                                        {pin}
-                                    </option>
-                                ))}
+                                <option value="-1">Choose pin</option>
+                                {pins.map(
+                                    (pin) =>
+                                        !pin.selected && (
+                                            <option
+                                                value={pin.id}
+                                                key={`text-${pin.id}`}
+                                            >
+                                                {pin.name}
+                                            </option>
+                                        )
+                                )}
                             </Select>
                         </div>
                     </div>

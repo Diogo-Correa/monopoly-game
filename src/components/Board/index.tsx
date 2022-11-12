@@ -1,14 +1,44 @@
 import { useEffect, useState, useContext } from 'react'
 import { toast } from 'react-toastify'
 import * as icon from 'react-icons/fa'
-import { Card, Tabs, Button, Badge, Avatar, Timeline } from 'flowbite-react'
+import {
+    Card,
+    Tabs,
+    Button,
+    Badge,
+    Avatar,
+    Timeline,
+    Tooltip,
+} from 'flowbite-react'
 import { GameContext } from '../../contexts/game.context'
 
 import { Player } from '../../types/Player'
 import { GameBoard } from '../GameBoard'
+import { PlayerPin } from '../Pin'
 
 export function Board() {
-    const { setHasGame, players, setPlayers } = useContext(GameContext)
+    const { setHasGame, players, setPlayers, pins } = useContext(GameContext)
+
+    const rollDice = (player: Player) => {
+        const playersStorage = localStorage.getItem('monopoly/players')
+        const playerState = [...players]
+        const actualSquare = playerState[Number(player.id)].square
+        let nextSquare = 0
+
+        let [dice1, dice2] = [0, 0]
+        dice1 = Math.floor(Math.random() * 6) + 1
+        dice2 = Math.floor(Math.random() * 6) + 1
+
+        nextSquare = actualSquare + dice1 + dice2
+
+        if (nextSquare < 40) playerState[Number(player.id)].square = nextSquare
+        else playerState[Number(player.id)].square = dice1 + dice2
+
+        localStorage.setItem('monopoly/players', JSON.stringify(playerState))
+        setPlayers(playerState)
+
+        console.log(`Player rolled ${dice1} and ${dice2}`)
+    }
 
     const handleControl = (player: Player) => {
         let updatedPlayer = player
@@ -36,6 +66,7 @@ export function Board() {
     const finishGame = () => {
         localStorage.setItem('monopoly/savedGame', 'false')
         localStorage.setItem('monopoly/players', '[]')
+        localStorage.removeItem('monopoly/pins')
         setHasGame(false)
         setPlayers([])
     }
@@ -49,15 +80,28 @@ export function Board() {
                             active={player.next ? true : false}
                             title={
                                 <>
-                                    <Badge color={player.pinColor}>
-                                        {player.name}
-                                    </Badge>
-                                    <Badge color="gray">
-                                        {String(player.plays)}
-                                    </Badge>
+                                    <Tooltip
+                                        content={
+                                            player.name
+                                                ? player.name
+                                                : pins[player.pin].name
+                                        }
+                                        placement="top"
+                                        key={player.pin}
+                                    >
+                                        <Badge>
+                                            <PlayerPin
+                                                id={player.pin}
+                                                name={''}
+                                                selected={false}
+                                                key={player.pin}
+                                            />
+                                        </Badge>
+                                    </Tooltip>
                                 </>
                             }
                             icon={!player.isIA ? icon.FaGamepad : icon.FaRobot}
+                            key={player.pin}
                         >
                             <div className="text-left flex space-between font-extrabold text-base">
                                 <>
@@ -76,7 +120,10 @@ export function Board() {
                             <div className="text-left flex font-extrabold text-base my-3">
                                 <div className="mr-2">
                                     {!player.isIA && (
-                                        <Button color="light">
+                                        <Button
+                                            color="light"
+                                            onClick={() => rollDice(player)}
+                                        >
                                             <icon.FaDice
                                                 size={20}
                                                 className="mr-2"
