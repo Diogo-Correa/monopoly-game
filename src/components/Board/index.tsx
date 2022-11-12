@@ -15,11 +15,30 @@ import { GameContext } from '../../contexts/game.context'
 import { Player } from '../../types/Player'
 import { GameBoard } from '../GameBoard'
 import { PlayerPin } from '../Pin'
-import { pinsArr } from '../../util/PinsArray'
 
 export function Board() {
-    const { setHasGame, players, setPlayers, pins, setPins } =
-        useContext(GameContext)
+    const { setHasGame, players, setPlayers, pins } = useContext(GameContext)
+
+    const rollDice = (player: Player) => {
+        const playersStorage = localStorage.getItem('monopoly/players')
+        const playerState = [...players]
+        const actualSquare = playerState[Number(player.id)].square
+        let nextSquare = 0
+
+        let [dice1, dice2] = [0, 0]
+        dice1 = Math.floor(Math.random() * 6) + 1
+        dice2 = Math.floor(Math.random() * 6) + 1
+
+        nextSquare = actualSquare + dice1 + dice2
+
+        if (nextSquare < 40) playerState[Number(player.id)].square = nextSquare
+        else playerState[Number(player.id)].square = dice1 + dice2
+
+        localStorage.setItem('monopoly/players', JSON.stringify(playerState))
+        setPlayers(playerState)
+
+        console.log(`Player rolled ${dice1} and ${dice2}`)
+    }
 
     const handleControl = (player: Player) => {
         let updatedPlayer = player
@@ -101,7 +120,10 @@ export function Board() {
                             <div className="text-left flex font-extrabold text-base my-3">
                                 <div className="mr-2">
                                     {!player.isIA && (
-                                        <Button color="light">
+                                        <Button
+                                            color="light"
+                                            onClick={() => rollDice(player)}
+                                        >
                                             <icon.FaDice
                                                 size={20}
                                                 className="mr-2"
