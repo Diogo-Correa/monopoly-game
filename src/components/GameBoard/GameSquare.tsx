@@ -32,11 +32,14 @@ export const GameSquare: FC<SquareProps> = ({ id }) => {
     }
 
     return (
-        <div
-            className={`hover:cursor-pointer hover:bg-gray-400 ${getSpaceClassName()}`}
-            onClick={showCard}
-        >
-            <Square id={id} />
-        </div>
+        <>
+            <div
+                className={`hover:cursor-pointer hover:bg-gray-400 ${getSpaceClassName()}`}
+                onClick={showCard}
+                key={id}
+            >
+                <Square id={id} />
+            </div>
+        </>
     )
 }

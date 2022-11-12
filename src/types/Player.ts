@@ -8,4 +8,5 @@ export type Player = {
     isIA: Boolean
     plays: Number
     next: Boolean
+    square: number
 }

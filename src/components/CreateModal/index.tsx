@@ -45,7 +45,7 @@ export function CreateModal() {
 
     const addPlayer = () => {
         if (playerPin === -1)
-            return toast('Choose a valid pin color!', { type: 'error' })
+            return toast('Choose a valid pin!', { type: 'error' })
 
         if (players.length < qtd) {
             const newPlayer: Player = {
@@ -57,6 +57,7 @@ export function CreateModal() {
                 isIA: false,
                 plays: 0,
                 next: false,
+                square: 1,
             }
 
             localStorage.setItem(
@@ -118,6 +119,7 @@ export function CreateModal() {
                 isIA: true,
                 plays: 0,
                 next: false,
+                square: 1,
             }
 
             bots.push(newPlayer)

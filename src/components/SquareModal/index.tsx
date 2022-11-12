@@ -1,11 +1,14 @@
 import { Modal } from 'flowbite-react'
 import { useContext } from 'react'
 import { ModalContext } from '../../contexts/create.context'
+import { GameContext } from '../../contexts/game.context'
 import { BoardTheme } from '../Board/theme'
+import { PlayerPin } from '../Pin'
 import { ColorBar } from '../Square/Squares/ColorBar'
 import './style.css'
 
 export const SquareModal = ({ id }: any) => {
+    const { players } = useContext(GameContext)
     const { isSquareModal, setSquareOpenModal } = useContext(ModalContext)
     const name: string | undefined = BoardTheme.get(id)?.name
     const msg: string | undefined = BoardTheme.get(id)?.msg
@@ -27,6 +30,23 @@ export const SquareModal = ({ id }: any) => {
                         <h2>{name}</h2>
                         <div className="icon">{icon}</div>
                         <p>{msg}</p>
+                        <hr />
+                        <b>Players in this place:</b>
+                        <div className="flex justify-center p-4">
+                            {players.map(
+                                (player) =>
+                                    player.square === id && (
+                                        <div className="mr-3">
+                                            <PlayerPin
+                                                id={player.pin}
+                                                name={''}
+                                                selected={false}
+                                                key={player.pin}
+                                            />
+                                        </div>
+                                    )
+                            )}
+                        </div>
                         <small>{price && `Price $${price}`}</small>
                     </div>
                 </Modal.Body>

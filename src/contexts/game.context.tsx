@@ -5,13 +5,14 @@ import { ModalContextProvider } from '../contexts/create.context'
 import { GameContextType, GameContextProps } from '../types/GameContext'
 import { Pin } from '../types/PinType'
 import { Player } from '../types/Player'
+import { pinsArr } from '../util/PinsArray'
 
 const playersStorage = localStorage.getItem('monopoly/players')
 let initialPlayers = []
 if (playersStorage) initialPlayers = JSON.parse(playersStorage)
 
 const pinsStorage = localStorage.getItem('monopoly/pins')
-let initialPins = []
+let initialPins = pinsArr
 if (pinsStorage) initialPins = JSON.parse(pinsStorage)
 
 const initialValue: GameContextType = {
