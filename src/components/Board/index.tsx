@@ -27,52 +27,32 @@ export function Board() {
             Math.floor(Math.random() * 6) + 1,
             Math.floor(Math.random() * 6) + 1,
         ]
-        const playerState = [...players]
-        const index = playerState.indexOf(player)
 
-        if (turns === 0)
-            return (playerState[Number(player.id)].orderDice = dice1 + dice2)
-        else {
+        if (turns === 0) {
+            player.orderDice = dice1 + dice2
+            return atualizePlayers(player)
+        } else {
             players.map((p) => {
                 if (p === player) {
                     let nextSquare = player.square + dice1 + dice2
 
-                    if (nextSquare < 40) playerState[index].square = nextSquare
-                    else
-                        playerState[index].square =
-                            (40 - player.square - (dice1 + dice2)) * -1
+                    if (nextSquare > 40)
+                        player.square = Math.abs(nextSquare - 40)
+                    else player.square = nextSquare
 
-                    localStorage.setItem(
-                        'monopoly/players',
-                        JSON.stringify(playerState)
-                    )
-                    setPlayers(playerState)
+                    atualizePlayers(player)
 
                     toast.update(diceId.current, {
                         render: `${player.name} rolled ${dice1} and ${dice2}`,
                         type: 'success',
-                        autoClose: 5000,
+                        autoClose: 1000,
+                        closeOnClick: true,
+                        closeButton: true,
                     })
                 }
             })
 
-            /* const actualSquare = playerState[Number(player.id)].square
-            let nextSquare = 0
-
-            nextSquare = actualSquare + dice1 + dice2
-
-            if (nextSquare < 40)
-                playerState[Number(player.id)].square = nextSquare
-            else playerState[Number(player.id)].square = dice1 + dice2
-
-            diceId.current = toast(`Player rolled ${dice1} and ${dice2}`, {
-            type: 'info',
-        })
-            toast.update(diceId.current, {
-                render: `${player.name} rolled ${dice1} and ${dice2}`,
-                type: 'success',
-                autoClose: 5000,
-            }) */
+            play(player)
         }
     }
 
@@ -89,9 +69,22 @@ export function Board() {
             }
         )
 
-        if (nextPlayer && nextPlayer.isIA) {
-            rollDice(player)
-        }
+        if (player.isIA) setTimeout(() => rollDice(player), 10000)
+    }
+
+    const play = (player: Player) => {
+        toast.update(loadingId.current, {
+            render: `${player.name}'s turn is over`,
+            type: 'info',
+            autoClose: 1000,
+            isLoading: false,
+        })
+
+        player.next = false
+        player.plays++
+        atualizePlayers(player)
+
+        getNextPlayer()
     }
 
     const selectOrder = () => {
@@ -138,26 +131,51 @@ export function Board() {
     }
 
     const handleControl = (player: Player) => {
-        let updatedPlayer = player
-        let playerState = [...players]
-        const playerStorage = localStorage.getItem('monopoly/players')
-        let playerArr
-        updatedPlayer.isIA = !updatedPlayer.isIA
-        if (playerStorage) {
-            // Remove from storage
-            playerArr = JSON.parse(playerStorage)
-            playerArr.splice(playerArr.indexOf(player), 1)
-            playerArr.push(updatedPlayer)
-            localStorage.setItem('monopoly/players', JSON.stringify(playerArr))
-
-            playerState.splice(playerState.indexOf(player), 1)
-            playerState.push(updatedPlayer)
-            setPlayers(playerState)
-
-            toast(`Player ${player.name} has been updated.`, {
-                type: 'success',
+        if (player.next)
+            return toast(`Its ${player.name}'s round, u can't do it now`, {
+                type: 'warning',
             })
+
+        player.isIA = !player.isIA
+        atualizePlayers(player)
+
+        toast(`Player ${player.name} has been updated.`, {
+            type: 'success',
+        })
+    }
+
+    const getNextPlayer = () => {
+        if (nextPlayer) {
+            const nextIndex = players.indexOf(nextPlayer) + 1
+            const nextP =
+                players[nextIndex > players.length - 1 ? 0 : nextIndex]
+            nextP.next = true
+            atualizePlayers(nextP)
+
+            if (nextIndex > players.length - 1) {
+                const nextTurn = turns + 1
+                localStorage.setItem('monopoly/turns', String(nextTurn))
+                setTurns(nextTurn)
+            }
+
+            localStorage.setItem('monopoly/nextPlayer', JSON.stringify(nextP))
+            setNextPlayer(nextP)
         }
+    }
+
+    const atualizePlayers = (player: Player) => {
+        const playersState = [...players]
+
+        playersState.map((oldPlayer) => {
+            const index = playersState.indexOf(oldPlayer)
+            if (oldPlayer.id === player.id) playersState[index] = player
+
+            localStorage.setItem(
+                'monopoly/players',
+                JSON.stringify(playersState)
+            )
+            setPlayers(playersState)
+        })
     }
 
     const finishGame = () => {
@@ -172,10 +190,7 @@ export function Board() {
 
     useEffect(() => {
         if (turns > 0) {
-            if (!toast.isActive(loadingId.current))
-                loadingId.current = toast.loading(
-                    `Its ${nextPlayer?.name}'s turn`
-                )
+            loadingId.current = toast.loading(`Its ${nextPlayer?.name}'s turn`)
             if (nextPlayer) turn(nextPlayer)
         } else {
             selectOrder()
