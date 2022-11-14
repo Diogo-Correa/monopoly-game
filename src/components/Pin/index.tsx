@@ -5,8 +5,8 @@ import * as icon from 'react-icons/fa'
 export const PlayerPin: FC<Pin> = ({ id }) => {
     const getPin = () => {
         if (id === 0) return <icon.FaDog size={26} className="text-red-700" />
-        if (id === 1) return <icon.FaCat size={26} className="text-stone-700" />
-        if (id === 2) return <icon.FaCrow size={26} className="text-zinc-800" />
+        if (id === 1) return <icon.FaCat size={26} className="text-zinc-500" />
+        if (id === 2) return <icon.FaCrow size={26} className="text-black" />
         if (id === 3)
             return <icon.FaFish size={26} className="text-green-700" />
         if (id === 4)

@@ -1,12 +1,12 @@
 export type Player = {
-    id: Number
+    id: number
     name: String
-    cash: Number
+    cash: number
     inJail: Boolean
     pin: number
-    avatar?: any
     isIA: Boolean
-    plays: Number
+    plays: number
     next: Boolean
     square: number
+    orderDice?: number
 }

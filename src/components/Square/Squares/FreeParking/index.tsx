@@ -24,7 +24,7 @@ export const FreeParking: React.FC<SquareProps> = ({ id }) => {
                                 id={player.pin}
                                 name={''}
                                 selected={false}
-                                key={player.square}
+                                key={`pin-` + player.square}
                             />
                         )
                 )}

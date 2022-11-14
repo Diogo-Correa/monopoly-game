@@ -11,6 +11,10 @@ export type GameContextType = {
     setIsFinished: (newState: boolean) => void
     players: Player[]
     setPlayers: (newState: any) => void
+    nextPlayer: Player | null
+    setNextPlayer: (newState: Player) => void
+    turns: number
+    setTurns: (newState: number) => void
 }
 
 export type GameContextProps = {
