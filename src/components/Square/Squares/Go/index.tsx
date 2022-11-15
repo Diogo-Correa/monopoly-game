@@ -7,13 +7,12 @@ import { GameContext } from '../../../../contexts/game.context'
 import { PlayerPin } from '../../../Pin'
 
 export const Go: React.FC<SquareProps> = ({ id }) => {
+    const msg: string | undefined = BoardTheme.get(id)?.msg
     const { players, turns } = useContext(GameContext)
     return (
         <>
             <div className="containerBoard">
-                <div className="instructions">
-                    Collect $200.00 salary as you pass
-                </div>
+                <div className="instructions">{msg}</div>
                 <div className="go-word">go</div>
             </div>
             <div className="flex w-auto justify-between">

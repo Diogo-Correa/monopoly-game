@@ -2,11 +2,11 @@ export type Player = {
     id: number
     name: String
     cash: number
-    inJail: Boolean
+    inJail: boolean
     pin: number
-    isIA: Boolean
+    isIA: boolean
     plays: number
-    next: Boolean
+    next: boolean
     square: number
     orderDice?: number
     properties: number[]

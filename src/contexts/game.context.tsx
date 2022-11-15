@@ -23,6 +23,10 @@ const turnsStorage = localStorage.getItem('monopoly/turns')
 let initialTurns = 0
 if (turnsStorage) initialTurns = Number(turnsStorage)
 
+const langStorage = localStorage.getItem('monopoly/lang')
+let initialLang = 'eng'
+if (langStorage) initialLang = langStorage
+
 const initialValue: GameContextType = {
     hasGame: localStorage.getItem('monopoly/savedGame') === 'true',
     pins: initialPins,
@@ -37,6 +41,8 @@ const initialValue: GameContextType = {
     turns: initialTurns,
     setTurns: () => {},
     atualizePlayers: () => {},
+    lang: initialLang,
+    setLang: () => {},
 }
 
 export const GameContext = createContext<GameContextType>(initialValue)
@@ -50,6 +56,7 @@ export const GameContextProvider = ({ children }: GameContextProps) => {
         initialValue.nextPlayer
     )
     const [turns, setTurns] = useState<number>(initialValue.turns)
+    const [lang, setLang] = useState<string>(initialValue.lang)
 
     const atualizePlayers = (player: Player) => {
         const playersState = [...players]
@@ -82,6 +89,8 @@ export const GameContextProvider = ({ children }: GameContextProps) => {
                 turns,
                 setTurns,
                 atualizePlayers,
+                lang,
+                setLang,
             }}
         >
             {children}

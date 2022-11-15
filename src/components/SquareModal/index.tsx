@@ -1,5 +1,7 @@
 import { Button, Modal } from 'flowbite-react'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
+import { FaFrown } from 'react-icons/fa'
+import { toast } from 'react-toastify'
 import { ModalContext } from '../../contexts/create.context'
 import { GameContext } from '../../contexts/game.context'
 import { SquareType } from '../../util/SquareType'
@@ -18,15 +20,30 @@ export const SquareModal = ({ id }: any) => {
     const price: number | undefined = BoardTheme.get(id)?.price
     const type: SquareType | undefined = SquareConfigData.get(id)?.type
     const [owner, setOwner] = useState(-1)
+    const toastId = useRef<number | string>()
 
     const buy = () => {
-        if (nextPlayer && price) {
-            if (nextPlayer.cash > price) {
-                nextPlayer.cash -= price
-                nextPlayer.properties?.push(id)
-                atualizePlayers(nextPlayer)
+        toastId.current = toast.loading(
+            `${nextPlayer?.name} is buying ${name}.`
+        )
+
+        setTimeout(() => {
+            if (nextPlayer && price) {
+                if (nextPlayer.cash > price) {
+                    nextPlayer.cash -= price
+                    nextPlayer.properties?.push(id)
+                    atualizePlayers(nextPlayer)
+                }
             }
-        }
+        }, 2000)
+
+        toast.update(toastId.current, {
+            render: `${nextPlayer?.name} buyed ${name}`,
+            type: 'success',
+            autoClose: 1000,
+            closeOnClick: true,
+            closeButton: true,
+        })
     }
 
     const getPropertyOwner = () => {
@@ -35,6 +52,14 @@ export const SquareModal = ({ id }: any) => {
                 if (property === id) setOwner(player.id)
             })
         })
+    }
+
+    const exitJail = () => {
+        if (nextPlayer) {
+            nextPlayer.inJail = false
+            nextPlayer.cash -= 50
+            atualizePlayers(nextPlayer)
+        }
     }
 
     useEffect(() => {
@@ -55,12 +80,43 @@ export const SquareModal = ({ id }: any) => {
                         <ColorBar id={id} />
                         <h2>{name}</h2>
                         <div className="icon">{icon}</div>
+
+                        {id === 11 && (
+                            <div className="containerBoard">
+                                <div className="window">
+                                    <div className="bar"></div>
+                                    <div className="bar"></div>
+                                    <div className="bar"></div>
+                                    <FaFrown className="person" />
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex justify-center items-center mt-5">
+                            {players.map(
+                                (player) =>
+                                    player.inJail &&
+                                    player.square === id && (
+                                        <PlayerPin
+                                            id={player.pin}
+                                            name={''}
+                                            selected={false}
+                                            key={`pin-` + player.pin}
+                                        />
+                                    )
+                            )}
+                        </div>
+
                         <p>{msg}</p>
                         <hr />
-                        <b>Players in this place:</b>
+                        {id != 11 ? (
+                            <b>Players in this place:</b>
+                        ) : (
+                            <b>Just Visiting:</b>
+                        )}
                         <div className="flex justify-center p-4">
                             {players.map(
                                 (player) =>
+                                    !player.inJail &&
                                     player.square === id && (
                                         <div className="mr-3">
                                             <PlayerPin
@@ -109,6 +165,16 @@ export const SquareModal = ({ id }: any) => {
                                     </div>
                                 </div>
                             )}
+
+                        {nextPlayer && nextPlayer.inJail && (
+                            <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
+                                <div>
+                                    <Button onClick={exitJail} color="success">
+                                        Pay $50
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </Modal.Body>
             </div>

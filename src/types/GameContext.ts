@@ -16,6 +16,8 @@ export type GameContextType = {
     turns: number
     setTurns: (newState: number) => void
     atualizePlayers: (newState: Player) => void
+    lang: string
+    setLang: (newState: string) => void
 }
 
 export type GameContextProps = {

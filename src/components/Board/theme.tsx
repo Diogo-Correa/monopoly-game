@@ -1,8 +1,9 @@
-import * as icon from 'react-icons/fa'
 import { SquareThemeData } from '../../interfaces/SquareThemeData'
+import * as icon from 'react-icons/fa'
+import { eng } from './langs/eng'
+import { ptBr } from './langs/pt-br'
 
 export const BoardTheme = new Map<number, SquareThemeData>()
-
 BoardTheme.set(1, {
     name: 'Go',
     msg: 'Collect $200.00 salary as you pass',
@@ -15,7 +16,11 @@ BoardTheme.set(3, {
     icon: <icon.FaCube className="drawing text-blue-300" />,
 })
 BoardTheme.set(4, { name: 'Baltic Avenue', price: 50 })
-BoardTheme.set(5, { name: 'Income Tax', msg: 'Pay 10% or $200', other: true })
+BoardTheme.set(5, {
+    name: 'Income Tax',
+    msg: 'Pay 10% or $200',
+    other: true,
+})
 BoardTheme.set(6, {
     name: 'Reading Railroad',
     price: 200,

@@ -1,13 +1,14 @@
 import { useEffect, useState, useContext, useRef } from 'react'
 import { toast } from 'react-toastify'
 import * as icon from 'react-icons/fa'
-import { Card, Tabs, Button, Badge, Tooltip } from 'flowbite-react'
+import { Card, Tabs, Button, Badge, Tooltip, ListGroup } from 'flowbite-react'
 import { GameContext } from '../../contexts/game.context'
 
 import { Player } from '../../types/Player'
 import { GameBoard } from '../GameBoard'
 import { PlayerPin } from '../Pin'
 import { ModalContext } from '../../contexts/create.context'
+import { Jail } from '../Square/Squares/Jail'
 
 export function Board() {
     const {
@@ -20,6 +21,8 @@ export function Board() {
         turns,
         setTurns,
         atualizePlayers,
+        lang,
+        setLang,
     } = useContext(GameContext)
     const { setSquareOpenModal, setSquareId } = useContext(ModalContext)
     const diceId = useRef<number | string>('')
@@ -61,24 +64,40 @@ export function Board() {
     }
 
     const turn = (player: Player) => {
-        diceId.current = toast(
-            `Waiting for ${nextPlayer?.name} to roll the dice`,
-            {
-                type: 'default',
-                closeButton: false,
-                closeOnClick: false,
-                icon: icon.FaDice,
-                autoClose: 60000,
-                pauseOnFocusLoss: false,
-            }
-        )
+        if (player.inJail) {
+            diceId.current = toast(
+                `${nextPlayer?.name} is in Jail. Waitinig for your decision.`,
+                {
+                    type: 'default',
+                    closeButton: false,
+                    closeOnClick: false,
+                    icon: icon.FaDice,
+                    autoClose: 60000,
+                    pauseOnFocusLoss: false,
+                }
+            )
+        } else {
+            diceId.current = toast(
+                `Waiting for ${nextPlayer?.name} to roll the dice`,
+                {
+                    type: 'default',
+                    closeButton: false,
+                    closeOnClick: false,
+                    icon: icon.FaDice,
+                    autoClose: 60000,
+                    pauseOnFocusLoss: false,
+                }
+            )
+        }
 
         if (player.isIA) setTimeout(() => rollDice(player), 10000)
     }
 
     const play = (player: Player) => {
         showCard(player)
+    }
 
+    const finishPlay = (player: Player) => {
         toast.update(loadingId.current, {
             render: `${player.name}'s turn is over`,
             type: 'info',
@@ -86,11 +105,11 @@ export function Board() {
             isLoading: false,
         })
 
-        /* player.next = false
+        player.next = false
         player.plays++
         atualizePlayers(player)
 
-        getNextPlayer() */
+        getNextPlayer()
     }
 
     const selectOrder = () => {
@@ -150,6 +169,17 @@ export function Board() {
         })
     }
 
+    const handleChangeTheme = () => {
+        if (lang === 'eng') {
+            localStorage.setItem('monopoly/lang', 'pt-br')
+            setLang('pt-br')
+        }
+        if (lang === 'pt-br') {
+            localStorage.setItem('monopoly/lang', 'eng')
+            setLang('eng')
+        }
+    }
+
     const getNextPlayer = () => {
         if (nextPlayer) {
             const nextIndex = players.indexOf(nextPlayer) + 1
@@ -170,6 +200,22 @@ export function Board() {
     }
 
     const showCard = (player: Player) => {
+        // Go to Jail
+        if (player.square === 31) {
+            setSquareOpenModal(true)
+            setSquareId(11)
+
+            player.square = 11
+            player.inJail = true
+            atualizePlayers(player)
+
+            toast(`${player.name} went to jail.`, {
+                type: 'error',
+            })
+
+            finishPlay(player)
+        }
+
         setSquareOpenModal(true)
         setSquareId(player.square)
     }
@@ -275,9 +321,25 @@ export function Board() {
                     ))}
 
                     <Tabs.Item title="Game" icon={icon.FaCog}>
-                        <Button color="dark" onClick={finishGame}>
-                            Finish
-                        </Button>
+                        <div className="w-full text-center">
+                            <ListGroup>
+                                <ListGroup.Item
+                                    icon={icon.FaGlobeAmericas}
+                                    onClick={handleChangeTheme}
+                                >
+                                    Change theme
+                                </ListGroup.Item>
+                                <ListGroup.Item icon={icon.FaCog}>
+                                    Settings
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    icon={icon.FaDoorClosed}
+                                    onClick={finishGame}
+                                >
+                                    Finish game
+                                </ListGroup.Item>
+                            </ListGroup>
+                        </div>
                     </Tabs.Item>
                 </Tabs.Group>
             </Card>
