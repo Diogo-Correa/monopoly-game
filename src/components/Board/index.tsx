@@ -36,9 +36,10 @@ export function Board() {
                 if (p === player) {
                     let nextSquare = player.square + dice1 + dice2
 
-                    if (nextSquare > 40)
+                    if (nextSquare > 40) {
                         player.square = Math.abs(nextSquare - 40)
-                    else player.square = nextSquare
+                        player.cash += 200
+                    } else player.square = nextSquare
 
                     atualizePlayers(player)
 
@@ -205,6 +206,7 @@ export function Board() {
                     {players?.map((player) => (
                         <Tabs.Item
                             active={player.next ? true : false}
+                            key={player.id}
                             title={
                                 <>
                                     <Tooltip
@@ -221,14 +223,12 @@ export function Board() {
                                                 id={player.pin}
                                                 name={''}
                                                 selected={false}
-                                                key={player.pin}
                                             />
                                         </Badge>
                                     </Tooltip>
                                 </>
                             }
                             icon={!player.isIA ? icon.FaGamepad : icon.FaRobot}
-                            key={player.pin}
                         >
                             <div className="text-left flex space-between font-extrabold text-base">
                                 <>

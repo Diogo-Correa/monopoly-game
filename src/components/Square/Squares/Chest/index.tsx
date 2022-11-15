@@ -24,7 +24,7 @@ export const Chest: React.FC<SquareProps> = ({ id }) => {
                                     id={player.pin}
                                     name={''}
                                     selected={false}
-                                    key={`pin` + player.square}
+                                    key={`pin-` + player.pin}
                                 />
                             )
                     )}

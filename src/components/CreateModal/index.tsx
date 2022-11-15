@@ -176,6 +176,7 @@ export function CreateModal() {
                                         : pins[player.pin].name
                                 }
                                 placement="top"
+                                key={player.id}
                             >
                                 <Badge
                                     color="success"

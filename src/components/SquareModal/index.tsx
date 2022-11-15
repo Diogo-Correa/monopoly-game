@@ -41,7 +41,12 @@ export const SquareModal = ({ id }: any) => {
                                                 id={player.pin}
                                                 name={''}
                                                 selected={false}
-                                                key={player.pin}
+                                                key={
+                                                    player.id +
+                                                    Math.floor(
+                                                        Math.random() * 10000000
+                                                    )
+                                                }
                                             />
                                         </div>
                                     )

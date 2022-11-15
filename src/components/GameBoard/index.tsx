@@ -62,9 +62,7 @@ export const GameBoard = () => {
 
                     <div className="row horizontal-row bottom-row">
                         {bottom.map((square) => (
-                            <>
-                                <GameSquare id={square} key={square} />
-                            </>
+                            <GameSquare id={square} key={square} />
                         ))}
                     </div>
 
