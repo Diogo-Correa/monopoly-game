@@ -36,6 +36,7 @@ const initialValue: GameContextType = {
     setNextPlayer: () => {},
     turns: initialTurns,
     setTurns: () => {},
+    atualizePlayers: () => {},
 }
 
 export const GameContext = createContext<GameContextType>(initialValue)
@@ -49,6 +50,21 @@ export const GameContextProvider = ({ children }: GameContextProps) => {
         initialValue.nextPlayer
     )
     const [turns, setTurns] = useState<number>(initialValue.turns)
+
+    const atualizePlayers = (player: Player) => {
+        const playersState = [...players]
+
+        playersState.map((oldPlayer) => {
+            const index = playersState.indexOf(oldPlayer)
+            if (oldPlayer.id === player.id) playersState[index] = player
+
+            localStorage.setItem(
+                'monopoly/players',
+                JSON.stringify(playersState)
+            )
+            setPlayers(playersState)
+        })
+    }
 
     return (
         <GameContext.Provider
@@ -65,6 +81,7 @@ export const GameContextProvider = ({ children }: GameContextProps) => {
                 setNextPlayer,
                 turns,
                 setTurns,
+                atualizePlayers,
             }}
         >
             {children}

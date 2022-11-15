@@ -7,6 +7,7 @@ import { GameContext } from '../../contexts/game.context'
 import { Player } from '../../types/Player'
 import { GameBoard } from '../GameBoard'
 import { PlayerPin } from '../Pin'
+import { ModalContext } from '../../contexts/create.context'
 
 export function Board() {
     const {
@@ -18,7 +19,9 @@ export function Board() {
         setNextPlayer,
         turns,
         setTurns,
+        atualizePlayers,
     } = useContext(GameContext)
+    const { setSquareOpenModal, setSquareId } = useContext(ModalContext)
     const diceId = useRef<number | string>('')
     const loadingId = useRef<number | string>('')
 
@@ -74,6 +77,8 @@ export function Board() {
     }
 
     const play = (player: Player) => {
+        showCard(player)
+
         toast.update(loadingId.current, {
             render: `${player.name}'s turn is over`,
             type: 'info',
@@ -81,11 +86,11 @@ export function Board() {
             isLoading: false,
         })
 
-        player.next = false
+        /* player.next = false
         player.plays++
         atualizePlayers(player)
 
-        getNextPlayer()
+        getNextPlayer() */
     }
 
     const selectOrder = () => {
@@ -164,19 +169,9 @@ export function Board() {
         }
     }
 
-    const atualizePlayers = (player: Player) => {
-        const playersState = [...players]
-
-        playersState.map((oldPlayer) => {
-            const index = playersState.indexOf(oldPlayer)
-            if (oldPlayer.id === player.id) playersState[index] = player
-
-            localStorage.setItem(
-                'monopoly/players',
-                JSON.stringify(playersState)
-            )
-            setPlayers(playersState)
-        })
+    const showCard = (player: Player) => {
+        setSquareOpenModal(true)
+        setSquareId(player.square)
     }
 
     const finishGame = () => {

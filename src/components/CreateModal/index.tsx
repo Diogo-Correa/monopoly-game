@@ -58,6 +58,7 @@ export function CreateModal() {
                 plays: 0,
                 next: false,
                 square: 1,
+                properties: [],
             }
 
             localStorage.setItem(
@@ -120,6 +121,7 @@ export function CreateModal() {
                 plays: 0,
                 next: false,
                 square: 1,
+                properties: [],
             }
 
             bots.push(newPlayer)

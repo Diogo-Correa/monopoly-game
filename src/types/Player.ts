@@ -9,4 +9,5 @@ export type Player = {
     next: Boolean
     square: number
     orderDice?: number
+    properties: number[]
 }

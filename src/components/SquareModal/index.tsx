@@ -1,19 +1,45 @@
-import { Modal } from 'flowbite-react'
-import { useContext } from 'react'
+import { Button, Modal } from 'flowbite-react'
+import { useContext, useEffect, useState } from 'react'
 import { ModalContext } from '../../contexts/create.context'
 import { GameContext } from '../../contexts/game.context'
+import { SquareType } from '../../util/SquareType'
 import { BoardTheme } from '../Board/theme'
 import { PlayerPin } from '../Pin'
+import { SquareConfigData } from '../Square/data'
 import { ColorBar } from '../Square/Squares/ColorBar'
 import './style.css'
 
 export const SquareModal = ({ id }: any) => {
-    const { players } = useContext(GameContext)
+    const { players, nextPlayer, atualizePlayers } = useContext(GameContext)
     const { isSquareModal, setSquareOpenModal } = useContext(ModalContext)
     const name: string | undefined = BoardTheme.get(id)?.name
     const msg: string | undefined = BoardTheme.get(id)?.msg
     const icon: any = BoardTheme.get(id)?.icon
     const price: number | undefined = BoardTheme.get(id)?.price
+    const type: SquareType | undefined = SquareConfigData.get(id)?.type
+    const [owner, setOwner] = useState(-1)
+
+    const buy = () => {
+        if (nextPlayer && price) {
+            if (nextPlayer.cash > price) {
+                nextPlayer.cash -= price
+                nextPlayer.properties?.push(id)
+                atualizePlayers(nextPlayer)
+            }
+        }
+    }
+
+    const getPropertyOwner = () => {
+        players.map((player) => {
+            player.properties.map((property) => {
+                if (property === id) setOwner(player.id)
+            })
+        })
+    }
+
+    useEffect(() => {
+        getPropertyOwner()
+    }, players)
 
     return (
         <Modal
@@ -53,6 +79,36 @@ export const SquareModal = ({ id }: any) => {
                             )}
                         </div>
                         <small>{price && `Price $${price}`}</small>
+                        {nextPlayer &&
+                            nextPlayer.square === id &&
+                            owner === -1 &&
+                            (type == SquareType.Railroad ||
+                                type == SquareType.Property ||
+                                type == SquareType.Utility) && (
+                                <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
+                                    <div>
+                                        <Button onClick={buy}>Buy now</Button>
+                                    </div>
+                                    <div>
+                                        <Button color="dark">Auction</Button>
+                                    </div>
+                                </div>
+                            )}
+
+                        {nextPlayer &&
+                            nextPlayer.square === id &&
+                            owner === nextPlayer.id &&
+                            (type == SquareType.Railroad ||
+                                type == SquareType.Property ||
+                                type == SquareType.Utility) && (
+                                <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
+                                    <div>
+                                        <Button onClick={buy} color="success">
+                                            1 house
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                     </div>
                 </Modal.Body>
             </div>
