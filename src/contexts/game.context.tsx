@@ -27,13 +27,14 @@ const langStorage = localStorage.getItem('monopoly/lang')
 let initialLang = 'eng'
 if (langStorage) initialLang = langStorage
 
+const rolledStorage = localStorage.getItem('monopoly/diceRolled')
+let initialRolled = rolledStorage === 'true'
+
 const initialValue: GameContextType = {
     hasGame: localStorage.getItem('monopoly/savedGame') === 'true',
     pins: initialPins,
     setPins: () => {},
     setHasGame: () => {},
-    isFinished: false,
-    setIsFinished: () => {},
     players: initialPlayers,
     setPlayers: () => {},
     nextPlayer: initialNext,
@@ -43,13 +44,15 @@ const initialValue: GameContextType = {
     atualizePlayers: () => {},
     lang: initialLang,
     setLang: () => {},
+    diceRolled: initialRolled,
+    setRolled: () => {},
 }
 
 export const GameContext = createContext<GameContextType>(initialValue)
 
 export const GameContextProvider = ({ children }: GameContextProps) => {
     const [hasGame, setHasGame] = useState(initialValue.hasGame)
-    const [isFinished, setIsFinished] = useState(initialValue.isFinished)
+    const [diceRolled, setRolled] = useState(initialValue.diceRolled)
     const [players, setPlayers] = useState<Player[]>(initialValue.players)
     const [pins, setPins] = useState<Pin[]>(initialValue.pins)
     const [nextPlayer, setNextPlayer] = useState<Player | null>(
@@ -80,8 +83,6 @@ export const GameContextProvider = ({ children }: GameContextProps) => {
                 pins,
                 setPins,
                 setHasGame,
-                isFinished,
-                setIsFinished,
                 players,
                 setPlayers,
                 nextPlayer,
@@ -91,6 +92,8 @@ export const GameContextProvider = ({ children }: GameContextProps) => {
                 atualizePlayers,
                 lang,
                 setLang,
+                diceRolled,
+                setRolled,
             }}
         >
             {children}

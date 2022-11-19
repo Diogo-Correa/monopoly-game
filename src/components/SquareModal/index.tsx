@@ -12,7 +12,8 @@ import { ColorBar } from '../Square/Squares/ColorBar'
 import './style.css'
 
 export const SquareModal = ({ id }: any) => {
-    const { players, nextPlayer, atualizePlayers } = useContext(GameContext)
+    const { players, nextPlayer, atualizePlayers, diceRolled } =
+        useContext(GameContext)
     const { isSquareModal, setSquareOpenModal } = useContext(ModalContext)
     const name: string | undefined = BoardTheme.get(id)?.name
     const msg: string | undefined = BoardTheme.get(id)?.msg
@@ -20,7 +21,7 @@ export const SquareModal = ({ id }: any) => {
     const price: number | undefined = BoardTheme.get(id)?.price
     const type: SquareType | undefined = SquareConfigData.get(id)?.type
     const [owner, setOwner] = useState(-1)
-    const toastId = useRef<number | string>()
+    const toastId = useRef<number | string>('')
 
     const buy = () => {
         toastId.current = toast.loading(
@@ -64,7 +65,7 @@ export const SquareModal = ({ id }: any) => {
 
     useEffect(() => {
         getPropertyOwner()
-    }, players)
+    }, [players])
 
     return (
         <Modal
@@ -140,7 +141,8 @@ export const SquareModal = ({ id }: any) => {
                             owner === -1 &&
                             (type == SquareType.Railroad ||
                                 type == SquareType.Property ||
-                                type == SquareType.Utility) && (
+                                type == SquareType.Utility) &&
+                            diceRolled && (
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
                                         <Button onClick={buy}>Buy now</Button>
@@ -154,9 +156,7 @@ export const SquareModal = ({ id }: any) => {
                         {nextPlayer &&
                             nextPlayer.square === id &&
                             owner === nextPlayer.id &&
-                            (type == SquareType.Railroad ||
-                                type == SquareType.Property ||
-                                type == SquareType.Utility) && (
+                            type == SquareType.Property && (
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
                                         <Button onClick={buy} color="success">
@@ -166,15 +166,20 @@ export const SquareModal = ({ id }: any) => {
                                 </div>
                             )}
 
-                        {nextPlayer && nextPlayer.inJail && (
-                            <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
-                                <div>
-                                    <Button onClick={exitJail} color="success">
-                                        Pay $50
-                                    </Button>
+                        {nextPlayer &&
+                            nextPlayer.inJail &&
+                            type == SquareType.Jail && (
+                                <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
+                                    <div>
+                                        <Button
+                                            onClick={exitJail}
+                                            color="success"
+                                        >
+                                            Pay $50
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
                     </div>
                 </Modal.Body>
             </div>

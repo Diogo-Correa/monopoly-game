@@ -23,6 +23,8 @@ export function Board() {
         atualizePlayers,
         lang,
         setLang,
+        diceRolled,
+        setRolled,
     } = useContext(GameContext)
     const { setSquareOpenModal, setSquareId } = useContext(ModalContext)
     const diceId = useRef<number | string>('')
@@ -58,7 +60,8 @@ export function Board() {
                     })
                 }
             })
-
+            localStorage.setItem('monopoly/diceRolled', 'true')
+            setRolled(true)
             play(player)
         }
     }
@@ -110,6 +113,8 @@ export function Board() {
         atualizePlayers(player)
 
         getNextPlayer()
+        localStorage.setItem('monopoly/diceRolled', 'false')
+        setRolled(false)
     }
 
     const selectOrder = () => {
@@ -181,22 +186,26 @@ export function Board() {
     }
 
     const getNextPlayer = () => {
-        if (nextPlayer) {
-            const nextIndex = players.indexOf(nextPlayer) + 1
-            const nextP =
-                players[nextIndex > players.length - 1 ? 0 : nextIndex]
-            nextP.next = true
-            atualizePlayers(nextP)
+        players.map((player, idx) => {
+            if (player.id === nextPlayer?.id) {
+                const nextP =
+                    players[idx + 1 > players.length - 1 ? 0 : idx + 1]
+                nextP.next = true
+                atualizePlayers(nextP)
 
-            if (nextIndex > players.length - 1) {
-                const nextTurn = turns + 1
-                localStorage.setItem('monopoly/turns', String(nextTurn))
-                setTurns(nextTurn)
+                if (idx + 1 > players.length - 1) {
+                    const nextTurn = turns + 1
+                    localStorage.setItem('monopoly/turns', String(nextTurn))
+                    setTurns(nextTurn)
+                }
+
+                localStorage.setItem(
+                    'monopoly/nextPlayer',
+                    JSON.stringify(nextP)
+                )
+                setNextPlayer(nextP)
             }
-
-            localStorage.setItem('monopoly/nextPlayer', JSON.stringify(nextP))
-            setNextPlayer(nextP)
-        }
+        })
     }
 
     const showCard = (player: Player) => {
@@ -231,6 +240,7 @@ export function Board() {
     }
 
     useEffect(() => {
+        console.log(nextPlayer)
         if (turns > 0) {
             loadingId.current = toast.loading(`Its ${nextPlayer?.name}'s turn`)
             if (nextPlayer) turn(nextPlayer)
@@ -287,16 +297,30 @@ export function Board() {
                             </div>
                             <div className="text-left flex font-extrabold text-base my-3">
                                 <div className="mr-2">
-                                    {!player.isIA && player.next && (
+                                    {!player.isIA &&
+                                        player.next &&
+                                        !diceRolled && (
+                                            <Button
+                                                color="light"
+                                                onClick={() => rollDice(player)}
+                                            >
+                                                <icon.FaDice
+                                                    size={20}
+                                                    className="mr-2"
+                                                />{' '}
+                                                Roll dice
+                                            </Button>
+                                        )}
+                                    {!player.isIA && player.next && diceRolled && (
                                         <Button
-                                            color="light"
-                                            onClick={() => rollDice(player)}
+                                            color="warning"
+                                            onClick={() => finishPlay(player)}
                                         >
                                             <icon.FaDice
                                                 size={20}
                                                 className="mr-2"
                                             />{' '}
-                                            Roll dice
+                                            Finish turn
                                         </Button>
                                     )}
                                 </div>
