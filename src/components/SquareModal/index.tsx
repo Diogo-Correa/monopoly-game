@@ -1,9 +1,10 @@
-import { Button, Modal } from 'flowbite-react'
+import { Button, Checkbox, Modal } from 'flowbite-react'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { FaFrown } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import { ModalContext } from '../../contexts/create.context'
 import { GameContext } from '../../contexts/game.context'
+import { Player } from '../../types/Player'
 import { doBuy } from '../../util/IA'
 import { SquareType } from '../../util/SquareType'
 import { BoardTheme } from '../Board/theme'
@@ -29,11 +30,81 @@ export const SquareModal = ({ id }: any) => {
     const tax: any = BoardTheme.get(id)?.tax
     const percent: any = BoardTheme.get(id)?.percent
     const price: number | undefined = BoardTheme.get(id)?.price
+    const rent: number | undefined = BoardTheme.get(id)?.rent
+    const color: string | undefined = BoardTheme.get(id)?.color
     const type: SquareType | undefined = SquareConfigData.get(id)?.type
     let other
     BoardTheme.get(id)?.other ? (other = true) : (other = false)
     const [owner, setOwner] = useState(-1)
     const toastId = useRef<number | string>('')
+
+    const checkMonopoly = (properties: any) => {
+        let hasMonopoly = false
+        if (
+            color === 'purple' &&
+            properties.includes(2) &&
+            properties.includes(4)
+        ) {
+            hasMonopoly = true
+        }
+        if (
+            color === 'cyan' &&
+            properties.includes(7) &&
+            properties.includes(9) &&
+            properties.includes(10)
+        ) {
+            hasMonopoly = true
+        }
+        if (
+            color === 'pink' &&
+            properties.includes(12) &&
+            properties.includes(14) &&
+            properties.includes(15)
+        ) {
+            hasMonopoly = true
+        }
+        if (
+            color === 'orange' &&
+            properties.includes(17) &&
+            properties.includes(19) &&
+            properties.includes(20)
+        ) {
+            hasMonopoly = true
+        }
+        if (
+            color === 'red' &&
+            properties.includes(22) &&
+            properties.includes(24) &&
+            properties.includes(25)
+        ) {
+            hasMonopoly = true
+        }
+        if (
+            color === 'yellow' &&
+            properties.includes(27) &&
+            properties.includes(28) &&
+            properties.includes(30)
+        ) {
+            hasMonopoly = true
+        }
+        if (
+            color === 'green' &&
+            properties.includes(32) &&
+            properties.includes(33) &&
+            properties.includes(35)
+        ) {
+            hasMonopoly = true
+        }
+        if (
+            color === 'blue' &&
+            properties.includes(38) &&
+            properties.includes(40)
+        ) {
+            hasMonopoly = true
+        }
+
+        return hasMonopoly
+    }
 
     const pay = (option: string) => {
         toastId.current = toast.loading(
@@ -41,12 +112,65 @@ export const SquareModal = ({ id }: any) => {
         )
 
         setTimeout(() => {
+            let hasMonopoly = false
+            let ownerP
+            if (nextPlayer && rent && option === 'rent') {
+                if (nextPlayer.cash >= rent) {
+                    if (type === SquareType.Property) {
+                        players.map((player) => {
+                            if (player.id === owner) ownerP = player
+                            if (!hasMonopoly)
+                                hasMonopoly = checkMonopoly(player.properties)
+                        })
+                        if (!hasMonopoly) {
+                            nextPlayer.cash -= rent
+                            if (ownerP) {
+                                ownerP!.cash += rent
+                                atualizePlayers(ownerP)
+                            }
+                        }
+                        if (hasMonopoly) {
+                            nextPlayer.cash -= rent * 2
+                            if (ownerP) {
+                                ownerP!.cash += rent * 2
+                                atualizePlayers(ownerP)
+                            }
+                        }
+                    }
+                    toast.update(toastId.current, {
+                        render: `${nextPlayer?.name} paid rent in ${name}`,
+                        type: 'success',
+                        autoClose: 1000,
+                        closeOnClick: true,
+                        closeButton: true,
+                        isLoading: false,
+                    })
+                } else {
+                    toast.update(toastId.current, {
+                        render: `${nextPlayer?.name} went bankrupt!`,
+                        type: 'error',
+                        autoClose: 1000,
+                        closeOnClick: true,
+                        closeButton: true,
+                        isLoading: false,
+                    })
+                }
+            }
             if (nextPlayer && tax && option === 'tax') {
                 if (nextPlayer.cash >= tax) {
                     nextPlayer.cash -= tax
                     toast.update(toastId.current, {
                         render: `${nextPlayer?.name} paid ${name}`,
                         type: 'success',
+                        autoClose: 1000,
+                        closeOnClick: true,
+                        closeButton: true,
+                        isLoading: false,
+                    })
+                } else {
+                    toast.update(toastId.current, {
+                        render: `${nextPlayer?.name} went bankrupt!`,
+                        type: 'error',
                         autoClose: 1000,
                         closeOnClick: true,
                         closeButton: true,
@@ -70,6 +194,15 @@ export const SquareModal = ({ id }: any) => {
                             total * 0.1
                         } to ${name}`,
                         type: 'success',
+                        autoClose: 1000,
+                        closeOnClick: true,
+                        closeButton: true,
+                        isLoading: false,
+                    })
+                } else {
+                    toast.update(toastId.current, {
+                        render: `${nextPlayer?.name} went bankrupt!`,
+                        type: 'error',
                         autoClose: 1000,
                         closeOnClick: true,
                         closeButton: true,
@@ -139,6 +272,23 @@ export const SquareModal = ({ id }: any) => {
             <div className="text-black">
                 <Modal.Body>
                     <div className="modal-square">
+                        <div className="flex justify-center p-4">
+                            {players.map(
+                                (player) =>
+                                    player.id === owner && (
+                                        <div className="mr-3">
+                                            <PlayerPin
+                                                id={player.pin}
+                                                name={''}
+                                                selected={false}
+                                                key={`player-PINO-
+                                                    ${player.id}
+                                                    `}
+                                            />
+                                        </div>
+                                    )
+                            )}
+                        </div>
                         <ColorBar id={id} />
                         <h2>{name}</h2>
                         <div className="icon">{icon}</div>
@@ -185,12 +335,9 @@ export const SquareModal = ({ id }: any) => {
                                                 id={player.pin}
                                                 name={''}
                                                 selected={false}
-                                                key={
-                                                    player.id +
-                                                    Math.floor(
-                                                        Math.random() * 10000000
-                                                    )
-                                                }
+                                                key={`player-PINO-FUCK-
+                                                    ${player.id}
+                                                    `}
                                             />
                                         </div>
                                     )
@@ -214,6 +361,7 @@ export const SquareModal = ({ id }: any) => {
                         {nextPlayer &&
                             nextPlayer.square === id &&
                             owner !== -1 &&
+                            owner !== nextPlayer.id &&
                             (type == SquareType.Railroad ||
                                 type == SquareType.Property ||
                                 type == SquareType.Utility) &&
@@ -222,7 +370,7 @@ export const SquareModal = ({ id }: any) => {
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
                                         <Button onClick={() => pay('rent')}>
-                                            Pay rent
+                                            Pay rent ${rent}
                                         </Button>
                                     </div>
                                 </div>
