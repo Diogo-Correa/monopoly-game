@@ -18,10 +18,16 @@ export type GameContextType = {
     setLang: (newState: string) => void
     diceRolled: boolean
     setRolled: (newState: boolean) => void
+    showCard: boolean
+    setShowCard: (newState: boolean) => void
     lastBrought: number
     setLastBrought: (newState: number) => void
     actionRequired: boolean
     setActionRequired: (newState: boolean) => void
+    loadingId: any
+    diceId: any
+    finishPlay: (newState: Player) => void
+    rollDice: (newState: Player) => void
 }
 
 export type GameContextProps = {

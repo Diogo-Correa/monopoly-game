@@ -4,8 +4,7 @@ import { FaFrown } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import { ModalContext } from '../../contexts/create.context'
 import { GameContext } from '../../contexts/game.context'
-import { Player } from '../../types/Player'
-import { doBuy } from '../../util/IA'
+import { doBuy, howExitJail } from '../../util/IA'
 import { SquareType } from '../../util/SquareType'
 import { BoardTheme } from '../Board/theme'
 import { PlayerPin } from '../Pin'
@@ -22,6 +21,8 @@ export const SquareModal = ({ id }: any) => {
         lastBrought,
         setLastBrought,
         setActionRequired,
+        finishPlay,
+        rollDice,
     } = useContext(GameContext)
     const { isSquareModal, setSquareOpenModal } = useContext(ModalContext)
     const name: string | undefined = BoardTheme.get(id)?.name
@@ -33,10 +34,9 @@ export const SquareModal = ({ id }: any) => {
     const rent: number | undefined = BoardTheme.get(id)?.rent
     const color: string | undefined = BoardTheme.get(id)?.color
     const type: SquareType | undefined = SquareConfigData.get(id)?.type
-    let other
+    let other: boolean
     BoardTheme.get(id)?.other ? (other = true) : (other = false)
     const [owner, setOwner] = useState(-1)
-    const [action, setAction] = useState(false)
     const toastId = useRef<number | string>('')
 
     const checkMonopoly = (properties: any) => {
@@ -215,7 +215,6 @@ export const SquareModal = ({ id }: any) => {
         nextPlayer && atualizePlayers(nextPlayer)
         localStorage.setItem('monopoly/actionRequired', 'false')
         setActionRequired(false)
-        setAction(true)
     }
 
     const buy = () => {
@@ -254,41 +253,91 @@ export const SquareModal = ({ id }: any) => {
 
     const exitJail = (option: string) => {
         if (nextPlayer) {
-            nextPlayer.inJail = false
-            if (option === 'card') nextPlayer.hasJailCard = false
-            if (option === 'pay') nextPlayer.cash -= 50
+            if (option === 'card') {
+                nextPlayer.hasJailCard = false
+                nextPlayer.inJail = false
+                nextPlayer.jailTurns = 0
+            }
+            if (option === 'pay') {
+                nextPlayer.cash -= 50
+                nextPlayer.inJail = false
+                nextPlayer.jailTurns = 0
+            }
+            if (option === 'dice') rollDice(nextPlayer)
             atualizePlayers(nextPlayer)
         }
     }
 
-    useEffect(() => {
-        if (
-            (nextPlayer &&
-                nextPlayer.square === id &&
-                owner !== -1 &&
-                owner !== nextPlayer.id &&
-                (type == SquareType.Railroad ||
-                    type == SquareType.Property ||
-                    type == SquareType.Utility) &&
-                diceRolled &&
-                !action) ||
-            (nextPlayer &&
-                nextPlayer.square === id &&
-                type == SquareType.Utility &&
-                diceRolled &&
-                !action)
-        ) {
-            setAction(false)
-            setActionRequired(true)
-            localStorage.setItem('monopoly/actionRequired', 'true')
-        } else {
-            setAction(true)
-            setActionRequired(false)
-            localStorage.setItem('monopoly/actionRequired', 'false')
-        }
+    const turnIA = () => {
+        if (nextPlayer) {
+            if (nextPlayer.inJail) {
+                exitJail(howExitJail(nextPlayer))
+            }
 
+            if (
+                owner === -1 &&
+                owner !== nextPlayer.id &&
+                nextPlayer.square === id
+            ) {
+                if (doBuy(nextPlayer)) buy()
+            }
+
+            if (owner !== -1 && nextPlayer.id !== owner) {
+                if (
+                    nextPlayer &&
+                    nextPlayer.square === id &&
+                    owner !== -1 &&
+                    owner !== nextPlayer.id &&
+                    (type == SquareType.Railroad ||
+                        type == SquareType.Property ||
+                        type == SquareType.Utility) &&
+                    !other &&
+                    diceRolled
+                )
+                    pay('rent')
+
+                if (
+                    nextPlayer &&
+                    nextPlayer.square === id &&
+                    type == SquareType.Utility &&
+                    other &&
+                    diceRolled
+                )
+                    pay('tax')
+            }
+            setTimeout(() => {
+                finishPlay(nextPlayer)
+                setSquareOpenModal(false)
+            }, 3000)
+        }
+    }
+
+    useEffect(() => {
         getPropertyOwner()
-    }, [players])
+
+        if (nextPlayer && nextPlayer.isIA) turnIA()
+
+        if (nextPlayer && !nextPlayer.isIA) {
+            if (
+                (nextPlayer.square === id &&
+                    owner !== -1 &&
+                    owner !== nextPlayer.id &&
+                    (type == SquareType.Railroad ||
+                        type == SquareType.Property ||
+                        type == SquareType.Utility) &&
+                    diceRolled) ||
+                (nextPlayer.square === id &&
+                    type == SquareType.Utility &&
+                    diceRolled)
+            ) {
+                setActionRequired(true)
+                localStorage.setItem('monopoly/actionRequired', 'true')
+            } else {
+                setActionRequired(false)
+                localStorage.setItem('monopoly/actionRequired', 'false')
+            }
+        }
+    }, [])
 
     return (
         <Modal
