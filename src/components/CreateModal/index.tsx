@@ -58,6 +58,8 @@ export function CreateModal() {
                 plays: 0,
                 next: false,
                 square: 1,
+                properties: [],
+                jailTurns: 0,
             }
 
             localStorage.setItem(
@@ -120,6 +122,8 @@ export function CreateModal() {
                 plays: 0,
                 next: false,
                 square: 1,
+                properties: [],
+                jailTurns: 0,
             }
 
             bots.push(newPlayer)
@@ -176,6 +180,7 @@ export function CreateModal() {
                                         : pins[player.pin].name
                                 }
                                 placement="top"
+                                key={player.id}
                             >
                                 <Badge
                                     color="success"

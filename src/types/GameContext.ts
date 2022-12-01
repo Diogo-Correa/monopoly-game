@@ -7,10 +7,21 @@ export type GameContextType = {
     pins: Pin[]
     setPins: (newState: any) => void
     setHasGame: (newState: boolean) => void
-    isFinished: boolean
-    setIsFinished: (newState: boolean) => void
     players: Player[]
     setPlayers: (newState: any) => void
+    nextPlayer: Player | null
+    setNextPlayer: (newState: Player) => void
+    turns: number
+    setTurns: (newState: number) => void
+    atualizePlayers: (newState: Player) => void
+    lang: string
+    setLang: (newState: string) => void
+    diceRolled: boolean
+    setRolled: (newState: boolean) => void
+    lastBrought: number
+    setLastBrought: (newState: number) => void
+    actionRequired: boolean
+    setActionRequired: (newState: boolean) => void
 }
 
 export type GameContextProps = {

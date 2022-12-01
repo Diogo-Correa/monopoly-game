@@ -31,3 +31,33 @@
     height: 25px;
     border-bottom: 2px solid #080808 !important;
   }
+
+  
+.modal-square .containerBoard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal-square .name {
+  font-size: 14px;
+  font-weight: 900;
+}
+.modal-square .window {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  position: relative;
+  width: 55px;
+  height: 55px;
+  background: #ff7300;
+  border: 2px solid #080808;
+}
+.modal-square .person {
+  position: absolute;
+  font-size: 40px;
+}
+.modal-square .bar {
+  height: 55px;
+  width: 2px;
+  background: #080808;
+}

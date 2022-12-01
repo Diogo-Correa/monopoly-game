@@ -41,7 +41,9 @@ export const GameBoard = () => {
                                     <Timeline.Point />
                                     <Timeline.Content>
                                         <Timeline.Time>
-                                            October 2022
+                                            <span className="text-indigo-700">
+                                                October 2022
+                                            </span>
                                         </Timeline.Time>
                                         <Timeline.Title>
                                             PlayerName turn
@@ -60,9 +62,7 @@ export const GameBoard = () => {
 
                     <div className="row horizontal-row bottom-row">
                         {bottom.map((square) => (
-                            <>
-                                <GameSquare id={square} key={square} />
-                            </>
+                            <GameSquare id={square} key={square} />
                         ))}
                     </div>
 

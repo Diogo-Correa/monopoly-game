@@ -18,6 +18,20 @@ export const Jail: React.FC<SquareProps> = ({ id }) => {
                         <div className="bar"></div>
                         <div className="bar"></div>
                         <FaFrown className="person" />
+                        <div className="absolute">
+                            {players.map(
+                                (player) =>
+                                    player.inJail &&
+                                    player.square === id && (
+                                        <PlayerPin
+                                            id={player.pin}
+                                            name={''}
+                                            selected={false}
+                                            key={`pin-` + player.pin}
+                                        />
+                                    )
+                            )}
+                        </div>
                     </div>
                     <div className="name">Jail</div>
                 </div>
@@ -27,12 +41,13 @@ export const Jail: React.FC<SquareProps> = ({ id }) => {
             <div className="absolute flex w-auto justify-between my-32">
                 {players.map(
                     (player) =>
+                        !player.inJail &&
                         player.square === id && (
                             <PlayerPin
                                 id={player.pin}
                                 name={''}
                                 selected={false}
-                                key={player.square}
+                                key={`pin-` + player.pin}
                             />
                         )
                 )}
