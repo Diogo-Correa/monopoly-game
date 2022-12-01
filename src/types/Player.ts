@@ -10,4 +10,6 @@ export type Player = {
     square: number
     orderDice?: number
     properties: number[]
+    jailTurns: number
+    hasJailCard?: boolean
 }

@@ -18,6 +18,8 @@ export type GameContextType = {
     setLang: (newState: string) => void
     diceRolled: boolean
     setRolled: (newState: boolean) => void
+    lastBrought: number
+    setLastBrought: (newState: number) => void
 }
 
 export type GameContextProps = {

@@ -59,6 +59,7 @@ export function CreateModal() {
                 next: false,
                 square: 1,
                 properties: [],
+                jailTurns: 0,
             }
 
             localStorage.setItem(
@@ -122,6 +123,7 @@ export function CreateModal() {
                 next: false,
                 square: 1,
                 properties: [],
+                jailTurns: 0,
             }
 
             bots.push(newPlayer)

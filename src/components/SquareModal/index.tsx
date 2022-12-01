@@ -4,6 +4,7 @@ import { FaFrown } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import { ModalContext } from '../../contexts/create.context'
 import { GameContext } from '../../contexts/game.context'
+import { doBuy } from '../../util/IA'
 import { SquareType } from '../../util/SquareType'
 import { BoardTheme } from '../Board/theme'
 import { PlayerPin } from '../Pin'
@@ -12,8 +13,15 @@ import { ColorBar } from '../Square/Squares/ColorBar'
 import './style.css'
 
 export const SquareModal = ({ id }: any) => {
-    const { players, nextPlayer, atualizePlayers, diceRolled } =
-        useContext(GameContext)
+    const {
+        players,
+        nextPlayer,
+        atualizePlayers,
+        diceRolled,
+        turns,
+        lastBrought,
+        setLastBrought,
+    } = useContext(GameContext)
     const { isSquareModal, setSquareOpenModal } = useContext(ModalContext)
     const name: string | undefined = BoardTheme.get(id)?.name
     const msg: string | undefined = BoardTheme.get(id)?.msg
@@ -30,21 +38,23 @@ export const SquareModal = ({ id }: any) => {
 
         setTimeout(() => {
             if (nextPlayer && price) {
-                if (nextPlayer.cash > price) {
+                if (nextPlayer.cash >= price) {
                     nextPlayer.cash -= price
                     nextPlayer.properties?.push(id)
                     atualizePlayers(nextPlayer)
+                    localStorage.setItem('monopoly/lastBrought', id)
+                    setLastBrought(id)
+                    toast.update(toastId.current, {
+                        render: `${nextPlayer?.name} brought ${name}`,
+                        type: 'success',
+                        autoClose: 1000,
+                        closeOnClick: true,
+                        closeButton: true,
+                        isLoading: false,
+                    })
                 }
             }
         }, 2000)
-
-        toast.update(toastId.current, {
-            render: `${nextPlayer?.name} buyed ${name}`,
-            type: 'success',
-            autoClose: 1000,
-            closeOnClick: true,
-            closeButton: true,
-        })
     }
 
     const getPropertyOwner = () => {
@@ -156,7 +166,8 @@ export const SquareModal = ({ id }: any) => {
                         {nextPlayer &&
                             nextPlayer.square === id &&
                             owner === nextPlayer.id &&
-                            type == SquareType.Property && (
+                            type === SquareType.Property &&
+                            lastBrought !== id && (
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
                                         <Button onClick={buy} color="success">

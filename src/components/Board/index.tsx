@@ -9,6 +9,9 @@ import { GameBoard } from '../GameBoard'
 import { PlayerPin } from '../Pin'
 import { ModalContext } from '../../contexts/create.context'
 import { Jail } from '../Square/Squares/Jail'
+import { doBuy } from '../../util/IA'
+import { chances } from '../../util/ChanceCards'
+import { communities } from '../../util/CommunityCards'
 
 export function Board() {
     const {
@@ -25,10 +28,12 @@ export function Board() {
         setLang,
         diceRolled,
         setRolled,
+        setLastBrought,
     } = useContext(GameContext)
     const { setSquareOpenModal, setSquareId } = useContext(ModalContext)
     const diceId = useRef<number | string>('')
     const loadingId = useRef<number | string>('')
+    const cards = useRef<number | string>('')
 
     const rollDice = (player: Player) => {
         let [dice1, dice2] = [
@@ -43,6 +48,34 @@ export function Board() {
             players.map((p) => {
                 if (p === player) {
                     let nextSquare = player.square + dice1 + dice2
+
+                    if (
+                        player.inJail &&
+                        player.jailTurns < 3 &&
+                        dice1 === dice2
+                    ) {
+                        player.inJail = false
+                        player.jailTurns = 0
+                    }
+
+                    if (
+                        player.inJail &&
+                        player.jailTurns < 3 &&
+                        dice1 !== dice2
+                    ) {
+                        player.jailTurns += 1
+                    }
+
+                    if (
+                        player.inJail &&
+                        player.jailTurns === 3 &&
+                        dice1 !== dice2
+                    ) {
+                        player.cash -= 50
+                        player.inJail = false
+                        player.jailTurns = 0
+                        toast(`${player.name} paid $50 to leave the jail.`)
+                    }
 
                     if (nextSquare > 40) {
                         player.square = Math.abs(nextSquare - 40)
@@ -80,23 +113,208 @@ export function Board() {
                 }
             )
         } else {
-            diceId.current = toast(
-                `Waiting for ${nextPlayer?.name} to roll the dice`,
-                {
-                    type: 'default',
-                    closeButton: false,
-                    closeOnClick: false,
-                    icon: icon.FaDice,
-                    autoClose: 60000,
-                    pauseOnFocusLoss: false,
-                }
-            )
+            if (!diceRolled) {
+                diceId.current = toast(
+                    `Waiting for ${nextPlayer?.name} to roll the dice`,
+                    {
+                        type: 'default',
+                        closeButton: false,
+                        closeOnClick: false,
+                        icon: icon.FaDice,
+                        autoClose: 60000,
+                        pauseOnFocusLoss: false,
+                    }
+                )
+            } else {
+                diceId.current = toast(
+                    `Waiting for ${nextPlayer?.name} finish turn`,
+                    {
+                        type: 'default',
+                        closeButton: false,
+                        closeOnClick: false,
+                        icon: icon.FaDice,
+                        autoClose: 60000,
+                        pauseOnFocusLoss: false,
+                    }
+                )
+            }
         }
 
         if (player.isIA) setTimeout(() => rollDice(player), 10000)
     }
 
+    const takeACommunityCard = () => {
+        let rand = Math.floor(Math.random() * communities.length) + 1
+        let jailCard
+
+        if (chances[rand].hasJailCard) {
+            players.map((p) => {
+                if (p.hasJailCard) jailCard = true
+            })
+            jailCard ? rand++ : null
+        }
+
+        return communities[rand]
+    }
+
+    const communityCard = (player: Player) => {
+        cards.current = toast(`Sorting`, {
+            isLoading: true,
+        })
+
+        const chanceCard = takeACommunityCard()
+
+        if (chanceCard.collectAll) {
+            player.cash += chanceCard.collectAll * players.length
+            players.map((p) => {
+                if (p.id != player.id) {
+                    console.log(`Player: ${player.cash}`)
+                    console.log(`Old Cash: ${p.cash}`)
+                    p.cash -= chanceCard.collectAll
+                    console.log(`New Cash: ${p.cash}`)
+                    atualizePlayers(p)
+                }
+            })
+        }
+
+        if (chanceCard.goToJail) goToJail(player)
+
+        if (chanceCard.hasJailCard) player.hasJailCard = true
+
+        if (chanceCard.pay) {
+            console.log(`Player cash: ${player.cash}`)
+            player.cash -= chanceCard.pay
+            console.log(`Player new cash: ${player.cash}`)
+        }
+
+        if (chanceCard.goTo && chanceCard.collect) {
+            console.log(`Player cash: ${player.cash}`)
+            if (player.square > chanceCard.goTo)
+                player.cash += chanceCard.collect
+
+            console.log(`Player new cash: ${player.cash}`)
+            player.square = chanceCard.goTo
+        }
+
+        if (!chanceCard.goTo && chanceCard.collect) {
+            console.log(`Player cash: ${player.cash}`)
+            player.cash += chanceCard.collect
+            console.log(`Player new cash: ${player.cash}`)
+        }
+
+        toast.update(cards.current, {
+            render: `${chanceCard.card}`,
+            isLoading: false,
+            autoClose: 10000,
+            icon: icon.FaCube,
+            type: 'info',
+        })
+
+        atualizePlayers(player)
+    }
+
+    const takeAChanceCard = () => {
+        let rand = Math.floor(Math.random() * 16) + 1
+        let jailCard
+
+        if (chances[rand].hasJailCard) {
+            players.map((p) => {
+                if (p.hasJailCard) jailCard = true
+            })
+            jailCard ? rand++ : null
+        }
+
+        return chances[rand]
+    }
+
+    const chanceCard = (player: Player) => {
+        cards.current = toast(`Sorting`, {
+            isLoading: true,
+        })
+
+        const chanceCard = takeAChanceCard()
+
+        if (chanceCard.payToAll) {
+            player.cash -= chanceCard.payToAll * players.length
+            players.map((p) => {
+                if (p.id != player.id) {
+                    console.log(`Player: ${player.cash}`)
+                    console.log(`Old Cash: ${p.cash}`)
+                    p.cash += chanceCard.payToAll
+                    console.log(`New Cash: ${p.cash}`)
+                    atualizePlayers(p)
+                }
+            })
+        }
+
+        if (chanceCard.goToJail) goToJail(player)
+
+        if (chanceCard.hasJailCard) player.hasJailCard = true
+
+        if (chanceCard.pay) {
+            console.log(`Player cash: ${player.cash}`)
+            player.cash -= chanceCard.pay
+            console.log(`Player new cash: ${player.cash}`)
+        }
+
+        if (chanceCard.goBack) player.square -= chanceCard.goBack
+
+        if (chanceCard.goTo && chanceCard.collect) {
+            console.log(`Player cash: ${player.cash}`)
+            if (player.square > chanceCard.goTo)
+                player.cash += chanceCard.collect
+
+            console.log(`Player new cash: ${player.cash}`)
+            player.square = chanceCard.goTo
+        }
+
+        if (!chanceCard.goTo && chanceCard.collect) {
+            console.log(`Player cash: ${player.cash}`)
+            player.cash += chanceCard.collect
+            console.log(`Player new cash: ${player.cash}`)
+        }
+
+        toast.update(cards.current, {
+            render: `${chanceCard.card}`,
+            isLoading: false,
+            autoClose: 10000,
+            icon: icon.FaQuestion,
+            type: 'warning',
+        })
+
+        atualizePlayers(player)
+    }
+
+    const goToJail = (player: Player) => {
+        // Go to Jail
+        if (player.square === 31) {
+            setSquareOpenModal(true)
+            setSquareId(11)
+
+            player.square = 11
+            player.inJail = true
+            player.jailTurns = 0
+            atualizePlayers(player)
+
+            toast(`${player.name} went to jail.`, {
+                type: 'error',
+            })
+
+            finishPlay(player)
+        }
+    }
+
     const play = (player: Player) => {
+        if (player.inJail) finishPlay(player)
+
+        goToJail(player)
+
+        if (player.square === 8 || player.square === 23 || player.square === 37)
+            chanceCard(player)
+
+        if (player.square === 3 || player.square === 18 || player.square === 34)
+            communityCard(player)
+
         showCard(player)
     }
 
@@ -108,6 +326,11 @@ export function Board() {
             isLoading: false,
         })
 
+        toast.update(diceId.current, {
+            type: 'info',
+            autoClose: 1,
+        })
+
         player.next = false
         player.plays++
         atualizePlayers(player)
@@ -115,6 +338,8 @@ export function Board() {
         getNextPlayer()
         localStorage.setItem('monopoly/diceRolled', 'false')
         setRolled(false)
+        localStorage.setItem('monopoly/lastBrought', '0')
+        setLastBrought(0)
     }
 
     const selectOrder = () => {
@@ -209,22 +434,6 @@ export function Board() {
     }
 
     const showCard = (player: Player) => {
-        // Go to Jail
-        if (player.square === 31) {
-            setSquareOpenModal(true)
-            setSquareId(11)
-
-            player.square = 11
-            player.inJail = true
-            atualizePlayers(player)
-
-            toast(`${player.name} went to jail.`, {
-                type: 'error',
-            })
-
-            finishPlay(player)
-        }
-
         setSquareOpenModal(true)
         setSquareId(player.square)
     }
@@ -240,7 +449,6 @@ export function Board() {
     }
 
     useEffect(() => {
-        console.log(nextPlayer)
         if (turns > 0) {
             loadingId.current = toast.loading(`Its ${nextPlayer?.name}'s turn`)
             if (nextPlayer) turn(nextPlayer)
