@@ -19,9 +19,9 @@ export const SquareModal = ({ id }: any) => {
         nextPlayer,
         atualizePlayers,
         diceRolled,
-        turns,
         lastBrought,
         setLastBrought,
+        setActionRequired,
     } = useContext(GameContext)
     const { isSquareModal, setSquareOpenModal } = useContext(ModalContext)
     const name: string | undefined = BoardTheme.get(id)?.name
@@ -36,6 +36,7 @@ export const SquareModal = ({ id }: any) => {
     let other
     BoardTheme.get(id)?.other ? (other = true) : (other = false)
     const [owner, setOwner] = useState(-1)
+    const [action, setAction] = useState(false)
     const toastId = useRef<number | string>('')
 
     const checkMonopoly = (properties: any) => {
@@ -212,6 +213,9 @@ export const SquareModal = ({ id }: any) => {
             }
         }, 2000)
         nextPlayer && atualizePlayers(nextPlayer)
+        localStorage.setItem('monopoly/actionRequired', 'false')
+        setActionRequired(false)
+        setAction(true)
     }
 
     const buy = () => {
@@ -258,6 +262,31 @@ export const SquareModal = ({ id }: any) => {
     }
 
     useEffect(() => {
+        if (
+            (nextPlayer &&
+                nextPlayer.square === id &&
+                owner !== -1 &&
+                owner !== nextPlayer.id &&
+                (type == SquareType.Railroad ||
+                    type == SquareType.Property ||
+                    type == SquareType.Utility) &&
+                diceRolled &&
+                !action) ||
+            (nextPlayer &&
+                nextPlayer.square === id &&
+                type == SquareType.Utility &&
+                diceRolled &&
+                !action)
+        ) {
+            setAction(false)
+            setActionRequired(true)
+            localStorage.setItem('monopoly/actionRequired', 'true')
+        } else {
+            setAction(true)
+            setActionRequired(false)
+            localStorage.setItem('monopoly/actionRequired', 'false')
+        }
+
         getPropertyOwner()
     }, [players])
 

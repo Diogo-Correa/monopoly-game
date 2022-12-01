@@ -29,6 +29,7 @@ export function Board() {
         diceRolled,
         setRolled,
         setLastBrought,
+        actionRequired,
     } = useContext(GameContext)
     const { setSquareOpenModal, setSquareId } = useContext(ModalContext)
     const diceId = useRef<number | string>('')
@@ -525,6 +526,9 @@ export function Board() {
                                         <Button
                                             color="warning"
                                             onClick={() => finishPlay(player)}
+                                            disabled={
+                                                actionRequired ? true : false
+                                            }
                                         >
                                             <icon.FaDice
                                                 size={20}

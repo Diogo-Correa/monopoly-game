@@ -20,6 +20,8 @@ export type GameContextType = {
     setRolled: (newState: boolean) => void
     lastBrought: number
     setLastBrought: (newState: number) => void
+    actionRequired: boolean
+    setActionRequired: (newState: boolean) => void
 }
 
 export type GameContextProps = {
