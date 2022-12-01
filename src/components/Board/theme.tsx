@@ -19,6 +19,8 @@ BoardTheme.set(4, { name: 'Baltic Avenue', price: 50 })
 BoardTheme.set(5, {
     name: 'Income Tax',
     msg: 'Pay 10% or $200',
+    tax: 200,
+    percent: 10,
     other: true,
 })
 BoardTheme.set(6, {
@@ -106,6 +108,8 @@ BoardTheme.set(38, { name: 'Park Place', price: 350 })
 BoardTheme.set(39, {
     name: 'Luxury Tax',
     msg: 'Pay $75.00',
+    tax: 75,
     icon: <icon.FaGem className="drawing text-black" />,
+    other: true,
 })
 BoardTheme.set(40, { name: 'Boardwalk', price: 400 })

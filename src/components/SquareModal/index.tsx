@@ -26,10 +26,60 @@ export const SquareModal = ({ id }: any) => {
     const name: string | undefined = BoardTheme.get(id)?.name
     const msg: string | undefined = BoardTheme.get(id)?.msg
     const icon: any = BoardTheme.get(id)?.icon
+    const tax: any = BoardTheme.get(id)?.tax
+    const percent: any = BoardTheme.get(id)?.percent
     const price: number | undefined = BoardTheme.get(id)?.price
     const type: SquareType | undefined = SquareConfigData.get(id)?.type
+    let other
+    BoardTheme.get(id)?.other ? (other = true) : (other = false)
     const [owner, setOwner] = useState(-1)
     const toastId = useRef<number | string>('')
+
+    const pay = (option: string) => {
+        toastId.current = toast.loading(
+            `${nextPlayer?.name} is paying ${name}.`
+        )
+
+        setTimeout(() => {
+            if (nextPlayer && tax && option === 'tax') {
+                if (nextPlayer.cash >= tax) {
+                    nextPlayer.cash -= tax
+                    toast.update(toastId.current, {
+                        render: `${nextPlayer?.name} paid ${name}`,
+                        type: 'success',
+                        autoClose: 1000,
+                        closeOnClick: true,
+                        closeButton: true,
+                        isLoading: false,
+                    })
+                }
+            }
+            if (nextPlayer && tax && option === 'percent') {
+                let total = nextPlayer.cash
+
+                nextPlayer.properties.map((property) => {
+                    const price: number | undefined =
+                        BoardTheme.get(property)?.price
+                    if (price) total += price
+                })
+
+                if (nextPlayer.cash >= total * 0.1) {
+                    nextPlayer.cash -= total * 0.1
+                    toast.update(toastId.current, {
+                        render: `${nextPlayer?.name} paid $${
+                            total * 0.1
+                        } to ${name}`,
+                        type: 'success',
+                        autoClose: 1000,
+                        closeOnClick: true,
+                        closeButton: true,
+                        isLoading: false,
+                    })
+                }
+            }
+        }, 2000)
+        nextPlayer && atualizePlayers(nextPlayer)
+    }
 
     const buy = () => {
         toastId.current = toast.loading(
@@ -65,10 +115,11 @@ export const SquareModal = ({ id }: any) => {
         })
     }
 
-    const exitJail = () => {
+    const exitJail = (option: string) => {
         if (nextPlayer) {
             nextPlayer.inJail = false
-            nextPlayer.cash -= 50
+            if (option === 'card') nextPlayer.hasJailCard = false
+            if (option === 'pay') nextPlayer.cash -= 50
             atualizePlayers(nextPlayer)
         }
     }
@@ -152,13 +203,50 @@ export const SquareModal = ({ id }: any) => {
                             (type == SquareType.Railroad ||
                                 type == SquareType.Property ||
                                 type == SquareType.Utility) &&
+                            !other &&
                             diceRolled && (
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
                                         <Button onClick={buy}>Buy now</Button>
                                     </div>
+                                </div>
+                            )}
+                        {nextPlayer &&
+                            nextPlayer.square === id &&
+                            owner !== -1 &&
+                            (type == SquareType.Railroad ||
+                                type == SquareType.Property ||
+                                type == SquareType.Utility) &&
+                            !other &&
+                            diceRolled && (
+                                <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
-                                        <Button color="dark">Auction</Button>
+                                        <Button onClick={() => pay('rent')}>
+                                            Pay rent
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        {nextPlayer &&
+                            nextPlayer.square === id &&
+                            type == SquareType.Utility &&
+                            other &&
+                            diceRolled && (
+                                <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
+                                    <div>
+                                        {percent && (
+                                            <Button
+                                                onClick={() => pay('percent')}
+                                                color="dark"
+                                            >
+                                                Pay {percent}%
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <Button onClick={() => pay('tax')}>
+                                            Pay ${tax}
+                                        </Button>
                                     </div>
                                 </div>
                             )}
@@ -179,15 +267,55 @@ export const SquareModal = ({ id }: any) => {
 
                         {nextPlayer &&
                             nextPlayer.inJail &&
-                            type == SquareType.Jail && (
+                            type == SquareType.Jail &&
+                            nextPlayer.jailTurns < 3 && (
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
+                                    <p>
+                                        Jail turns: {nextPlayer.jailTurns + 1}
+                                    </p>
+                                    {nextPlayer.jailTurns === 0 && (
+                                        <ul>
+                                            <li>Pay $50 and roll the dices</li>
+                                            <li>Use 'Get Out of Jail Free'</li>
+                                            <li>Get doubles on the dices</li>
+                                        </ul>
+                                    )}
+                                    {nextPlayer.jailTurns === 1 && (
+                                        <ul>
+                                            <li>Pay $50 and roll the dices</li>
+                                            <li>Get doubles on the dices</li>
+                                        </ul>
+                                    )}
+                                    {nextPlayer.jailTurns === 2 && (
+                                        <ul>
+                                            <li>
+                                                Get doubles on the dices or pay
+                                                $50
+                                            </li>
+                                        </ul>
+                                    )}
                                     <div>
-                                        <Button
-                                            onClick={exitJail}
-                                            color="success"
-                                        >
-                                            Pay $50
-                                        </Button>
+                                        {nextPlayer.jailTurns < 2 && (
+                                            <Button
+                                                onClick={() => exitJail(`pay`)}
+                                                color="success"
+                                            >
+                                                Pay $50
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <div>
+                                        {nextPlayer.hasJailCard &&
+                                            nextPlayer.jailTurns < 1 && (
+                                                <Button
+                                                    onClick={() =>
+                                                        exitJail('card')
+                                                    }
+                                                    color="dark"
+                                                >
+                                                    Get Out of Jail Free
+                                                </Button>
+                                            )}
                                     </div>
                                 </div>
                             )}

@@ -60,15 +60,17 @@ export function Board() {
 
                     if (
                         player.inJail &&
-                        player.jailTurns < 3 &&
+                        player.jailTurns < 2 &&
                         dice1 !== dice2
                     ) {
                         player.jailTurns += 1
+                        atualizePlayers(player)
+                        return finishPlay(player)
                     }
 
                     if (
                         player.inJail &&
-                        player.jailTurns === 3 &&
+                        player.jailTurns === 2 &&
                         dice1 !== dice2
                     ) {
                         player.cash -= 50
@@ -147,7 +149,7 @@ export function Board() {
         let rand = Math.floor(Math.random() * communities.length) + 1
         let jailCard
 
-        if (chances[rand].hasJailCard) {
+        if (communities[rand].hasJailCard) {
             players.map((p) => {
                 if (p.hasJailCard) jailCard = true
             })
