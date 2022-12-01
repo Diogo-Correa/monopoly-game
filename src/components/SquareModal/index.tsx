@@ -37,6 +37,7 @@ export const SquareModal = ({ id }: any) => {
     let other: boolean
     BoardTheme.get(id)?.other ? (other = true) : (other = false)
     const [owner, setOwner] = useState(-1)
+    const [action, setAction] = useState(false)
     const toastId = useRef<number | string>('')
 
     const checkMonopoly = (properties: any) => {
@@ -108,9 +109,26 @@ export const SquareModal = ({ id }: any) => {
     }
 
     const pay = (option: string) => {
+        if (nextPlayer && !nextPlayer.isIA) setAction(true)
         toastId.current = toast.loading(
             `${nextPlayer?.name} is paying ${name}.`
         )
+
+        if (
+            (nextPlayer && rent && nextPlayer.cash <= rent) ||
+            (nextPlayer && price && nextPlayer.cash <= price)
+        ) {
+            toast.update(toastId.current, {
+                render: `${nextPlayer?.name} went bankrupt!`,
+                type: 'error',
+                autoClose: 1000,
+                closeOnClick: true,
+                closeButton: true,
+                isLoading: false,
+            })
+            
+            return
+        }
 
         setTimeout(() => {
             let hasMonopoly = false
@@ -141,15 +159,6 @@ export const SquareModal = ({ id }: any) => {
                     toast.update(toastId.current, {
                         render: `${nextPlayer?.name} paid rent in ${name}`,
                         type: 'success',
-                        autoClose: 1000,
-                        closeOnClick: true,
-                        closeButton: true,
-                        isLoading: false,
-                    })
-                } else {
-                    toast.update(toastId.current, {
-                        render: `${nextPlayer?.name} went bankrupt!`,
-                        type: 'error',
                         autoClose: 1000,
                         closeOnClick: true,
                         closeButton: true,
@@ -218,6 +227,7 @@ export const SquareModal = ({ id }: any) => {
     }
 
     const buy = () => {
+        if (nextPlayer && !nextPlayer.isIA) setAction(true)
         toastId.current = toast.loading(
             `${nextPlayer?.name} is buying ${name}.`
         )
@@ -274,20 +284,17 @@ export const SquareModal = ({ id }: any) => {
                 exitJail(howExitJail(nextPlayer))
             }
 
-            if (
-                owner === -1 &&
-                owner !== nextPlayer.id &&
-                nextPlayer.square === id
-            ) {
+            if (owner === -1 && nextPlayer.square === id) {
+                console.log(owner)
                 if (doBuy(nextPlayer)) buy()
             }
 
-            if (owner !== -1 && nextPlayer.id !== owner) {
+            if (
+                owner !== -1 &&
+                nextPlayer.id !== owner &&
+                nextPlayer.square === id
+            ) {
                 if (
-                    nextPlayer &&
-                    nextPlayer.square === id &&
-                    owner !== -1 &&
-                    owner !== nextPlayer.id &&
                     (type == SquareType.Railroad ||
                         type == SquareType.Property ||
                         type == SquareType.Utility) &&
@@ -296,13 +303,7 @@ export const SquareModal = ({ id }: any) => {
                 )
                     pay('rent')
 
-                if (
-                    nextPlayer &&
-                    nextPlayer.square === id &&
-                    type == SquareType.Utility &&
-                    other &&
-                    diceRolled
-                )
+                if (type == SquareType.Utility && other && diceRolled)
                     pay('tax')
             }
             setTimeout(() => {
@@ -337,7 +338,7 @@ export const SquareModal = ({ id }: any) => {
                 localStorage.setItem('monopoly/actionRequired', 'false')
             }
         }
-    }, [])
+    }, [nextPlayer])
 
     return (
         <Modal
@@ -423,13 +424,15 @@ export const SquareModal = ({ id }: any) => {
                         </div>
                         <small>{price && `Price $${price}`}</small>
                         {nextPlayer &&
+                            !nextPlayer.isIA &&
                             nextPlayer.square === id &&
                             owner === -1 &&
                             (type == SquareType.Railroad ||
                                 type == SquareType.Property ||
                                 type == SquareType.Utility) &&
                             !other &&
-                            diceRolled && (
+                            diceRolled &&
+                            !action && (
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
                                         <Button onClick={buy}>Buy now</Button>
@@ -437,6 +440,7 @@ export const SquareModal = ({ id }: any) => {
                                 </div>
                             )}
                         {nextPlayer &&
+                            !nextPlayer.isIA &&
                             nextPlayer.square === id &&
                             owner !== -1 &&
                             owner !== nextPlayer.id &&
@@ -444,7 +448,8 @@ export const SquareModal = ({ id }: any) => {
                                 type == SquareType.Property ||
                                 type == SquareType.Utility) &&
                             !other &&
-                            diceRolled && (
+                            diceRolled &&
+                            !action && (
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
                                         <Button onClick={() => pay('rent')}>
@@ -454,10 +459,12 @@ export const SquareModal = ({ id }: any) => {
                                 </div>
                             )}
                         {nextPlayer &&
+                            !nextPlayer.isIA &&
                             nextPlayer.square === id &&
                             type == SquareType.Utility &&
                             other &&
-                            diceRolled && (
+                            diceRolled &&
+                            !action && (
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
                                         {percent && (
@@ -478,10 +485,12 @@ export const SquareModal = ({ id }: any) => {
                             )}
 
                         {nextPlayer &&
+                            !nextPlayer.isIA &&
                             nextPlayer.square === id &&
                             owner === nextPlayer.id &&
                             type === SquareType.Property &&
-                            lastBrought !== id && (
+                            lastBrought !== id &&
+                            !action && (
                                 <div className="flex flex-wrap justify-center items-center gap-2 mt-5">
                                     <div>
                                         <Button onClick={buy} color="success">
@@ -521,18 +530,24 @@ export const SquareModal = ({ id }: any) => {
                                         </ul>
                                     )}
                                     <div>
-                                        {nextPlayer.jailTurns < 2 && (
-                                            <Button
-                                                onClick={() => exitJail(`pay`)}
-                                                color="success"
-                                            >
-                                                Pay $50
-                                            </Button>
-                                        )}
+                                        {nextPlayer.jailTurns < 2 &&
+                                            !nextPlayer.isIA &&
+                                            !action && (
+                                                <Button
+                                                    onClick={() =>
+                                                        exitJail(`pay`)
+                                                    }
+                                                    color="success"
+                                                >
+                                                    Pay $50
+                                                </Button>
+                                            )}
                                     </div>
                                     <div>
                                         {nextPlayer.hasJailCard &&
-                                            nextPlayer.jailTurns < 1 && (
+                                            nextPlayer.jailTurns < 1 &&
+                                            !nextPlayer.isIA &&
+                                            !action && (
                                                 <Button
                                                     onClick={() =>
                                                         exitJail('card')

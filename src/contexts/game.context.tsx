@@ -1,4 +1,4 @@
-import { createContext, useContext, useRef, useState } from 'react'
+import { createContext, useEffect, useRef, useState } from 'react'
 import { Board } from '../components/Board'
 import { Menu } from '../components/Menu'
 import { ModalContextProvider } from '../contexts/create.context'
@@ -249,10 +249,11 @@ export const GameContextProvider = ({ children }: GameContextProps) => {
 
     const takeAChanceCard = () => {
         let rand = Math.floor(Math.random() * 16) + 1
-        let jailCard
+        let jailCard = false
 
-        if (chances[rand].hasJailCard) {
+        if (rand === 8) {
             players.map((p) => {
+                if (!p.hasJailCard) p.hasJailCard = true
                 if (p.hasJailCard) jailCard = true
             })
             jailCard ? rand++ : null
@@ -320,10 +321,6 @@ export const GameContextProvider = ({ children }: GameContextProps) => {
     }
 
     const goToJail = (player: Player) => {
-        // Go to Jail
-        setSquareOpenModal(true)
-        setSquareId(11)
-
         player.square = 11
         player.inJail = true
         player.jailTurns = 0
